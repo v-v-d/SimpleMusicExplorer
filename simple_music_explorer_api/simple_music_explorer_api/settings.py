@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/3.0/ref/settings/
 """
 
 import os
+from configparser import ConfigParser
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -19,11 +20,15 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.0/howto/deployment/checklist/
 
+local_config_path = os.path.join(BASE_DIR, 'conf', 'local.conf')
+config = ConfigParser()
+config.read(local_config_path)
+
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'co)cf+2l9kc%heo#6k-gkn1p1v7a85r$c!fi0*s#y(!t*2-3jm'
+SECRET_KEY = config.get('main', 'SECRET')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = config.getboolean('main', 'DEBUG')
 
 ALLOWED_HOSTS = []
 
