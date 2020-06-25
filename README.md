@@ -1,4 +1,5 @@
-# Simple Music Explorer
+Simple Music Explorer
+=======
 Сервис с веб-интерфейсом для музыкантов и слушателей, ценителей ноунэйм андерграунда. 
 Позволяет загружать и продавать свою музыку и сопутствующие ей товары. 
 Музыкант получает 100% роялти, размещение музыки и товаров бесплатно.
@@ -41,3 +42,30 @@
     * покупать подарочные карты и передавать их другим юзерам
     * подписываться на обновления артиста
     
+Set it up
+------
+1 Create a virtual environment and install the requirements on:
+
+Linux
+
+    $ python3 -m venv venv
+    $ source venv/bin/activate
+    $ pip install --upgrade pip
+    $ pip install -r requirements.txt
+    
+Windows
+
+    $ py -m venv venv
+    $ venv/Scripts/activate
+    $ pip install --upgrade pip
+    $ pip install -r requirements.txt
+    
+2 Start the development server
+
+    $ python manage.py runserver
+    
+Dependencies
+------
+
+Simple Music Explorer uses Django as a web framework, Django Rest Framework 
+for creating the interface, and Vue.js (Vuex, Vue Router) as frontend framework. 
