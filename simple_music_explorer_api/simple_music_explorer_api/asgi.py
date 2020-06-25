@@ -1,5 +1,5 @@
 """
-ASGI config for simple_music_explorer project.
+ASGI config for simple_music_explorer_api project.
 
 It exposes the ASGI callable as a module-level variable named ``application``.
 
@@ -11,6 +11,6 @@ import os
 
 from django.core.asgi import get_asgi_application
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'simple_music_explorer.settings')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'simple_music_explorer_api.settings')
 
 application = get_asgi_application()
