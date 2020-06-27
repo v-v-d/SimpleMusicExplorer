@@ -1,5 +1,5 @@
-from django.http import Http404
 from rest_framework import status
+from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -28,19 +28,13 @@ class AlbumDetailView(APIView):
     """
     retrieve, update or delete an album
     """
-    def get_object(self, pk):
-        try:
-            return AlbumModel.objects.get(pk=pk)
-        except AlbumModel.DoesNotExist:
-            raise Http404
-
     def get(self, request, pk):
-        album = self.get_object(pk)
+        album = get_object_or_404(AlbumModel, id=pk)
         serializer = AlbumSerializer(album)
         return Response(serializer.data)
 
     def put(self, request, pk):
-        album = self.get_object(pk)
+        album = get_object_or_404(AlbumModel, id=pk)
         serializer = AlbumSerializer(album, data=request.data)
         if serializer.is_valid():
             serializer.save()
@@ -48,7 +42,7 @@ class AlbumDetailView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, pk):
-        album = self.get_object(pk)
+        album = get_object_or_404(AlbumModel, id=pk)
         album.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
