@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from rest_framework import permissions
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -10,9 +10,12 @@ from .serializers import ArtistSerializer, ArtistCreateSerializer
 class CustomerAccessPermission(permissions.BasePermission):
 
     def has_permission(self, request, view):
+        if request.method == 'GET':
+            return True
+
         pk = request.parser_context['kwargs']['pk']
-        user = Artist.objects.filter(id=pk).first().user_id
-        if user == request.user.id and request.user.is_artist:
+        user = Artist.objects.filter(id=pk).first()
+        if user and user.user_id == request.user.id and request.user.is_artist:
             return True
         return False
 
@@ -51,7 +54,7 @@ class ArtistDetail(APIView):
     permission_classes = [permissions.IsAuthenticated, CustomerAccessPermission]
 
     def get(self, request, pk):
-        artist = Artist.objects.get(user_id=request.user.id, id=pk)
+        artist = get_object_or_404(Artist, id=pk)
         serializer = ArtistSerializer(artist)
         return Response(serializer.data)
 
