@@ -3,6 +3,7 @@
 import os
 import sys
 
+#some changes
 
 def main():
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'simple_music_explorer_api.settings')
