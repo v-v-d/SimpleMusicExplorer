@@ -1,12 +1,13 @@
 from django.conf import settings
 from django.db import models
 from django.contrib.auth.models import AbstractUser
-from django.db.models.signals import post_save
 
 
 class User(AbstractUser):
     email = models.EmailField(blank=False, unique=True)
-    artist = models.BooleanField(default=False)
+    is_artist = models.BooleanField(default=False)
+
+    REQUIRED_FIELDS = ['is_artist']
 
     def __str__(self):
         return self.username

@@ -194,7 +194,8 @@ DJOSER = {
     'SEND_ACTIVATION_EMAIL': True,  # Подтверждение регистрации по почте
     'USER_CREATE_PASSWORD_RETYPE': True,
     'SERIALIZERS': {
-        'user_create': 'authapp.serializers.UserCreateSerializer',
-        'user': 'authapp.serializers.UserCreateSerializer',
+        # 'user_create': 'authapp.serializers.UserCreateSerializer',
+        # 'user': 'authapp.serializers.UserUpdateSerializer',
+        # 'user_update': 'authapp.serializers.UserUpdateSerializer',
     },
 }
