@@ -1,17 +1,13 @@
 from rest_framework import serializers
-from AlbumsBackend.models import AlbumModel
+from AlbumsBackend.models import AlbumModel, TrackModel
 
 
-class AlbumSerializer(serializers.Serializer):
-    id = serializers.IntegerField(read_only=True)
-    name = serializers.CharField(required=True, allow_blank=False, max_length=64)
-    price = serializers.FloatField(min_value=0, required=True)
-    genre = serializers.CharField(max_length=32)
-    date = serializers.DateField(required=True)
-    description = serializers.CharField(max_length=512, allow_blank=True)
-    artist_name = serializers.CharField(max_length=128, allow_blank=False)
-    artist_id = serializers.IntegerField(allow_null=False)
+class AlbumSerializer(serializers.ModelSerializer):
     tracks = serializers.StringRelatedField(many=True)
+
+    class Meta:
+        model = AlbumModel
+        fields = ('id', 'name', 'price', 'genre', 'date', 'description', 'artist_name', 'artist_id', 'tracks')
 
     def create(self, validated_data):
         """
@@ -34,8 +30,9 @@ class AlbumSerializer(serializers.Serializer):
         return instance
 
 
-class SongSerializer:
-    id = serializers.IntegerField(read_only=True)
-    name = serializers.CharField(required=True, allow_blank=False, max_length=64)
-    artist_name = serializers.CharField(max_length=128, allow_blank=False)
-    album = serializers.StringRelatedField()
+class TrackSerializer(serializers.ModelSerializer):
+    album = serializers.PrimaryKeyRelatedField(queryset=AlbumModel.objects.all())
+
+    class Meta:
+        model = TrackModel
+        fields = ('id', 'name', 'artist_id', 'artist_name', 'album')

@@ -3,9 +3,8 @@ from django.utils import timezone
 
 
 class AlbumModel(models.Model):
-    db_table = 'albums'
-
     class Meta:
+        db_table = 'albums'
         constraints = [
             models.CheckConstraint(check=models.Q(price__gte=0), name='price_gte_0'),
         ]
@@ -21,11 +20,17 @@ class AlbumModel(models.Model):
     # TODO: add a cover art
 
 
-class SongModel(models.Model):
-    db_table = 'songs'
+class TrackModel(models.Model):
+    class Meta:
+        db_table = 'tracks'
+        unique_together = ['album', 'order']
+        ordering = ['order']
 
-    name = models.CharField(max_length=64, null=False)
     artist_name = models.CharField(max_length=128, null=False)
     artist_id = models.IntegerField(null=False)
+    title = models.CharField(max_length=64, null=False)
     album = models.ForeignKey('AlbumModel', related_name='tracks', null=False, on_delete=models.CASCADE)
-    # album_id = models.ForeignKey('AlbumModel', null=False, on_delete=models.DO_NOTHING)
+    order = models.IntegerField()
+
+    def __str__(self):
+        return '%d: %s' % (self.order, self.title)

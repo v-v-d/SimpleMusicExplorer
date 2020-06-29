@@ -3,8 +3,8 @@ from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from AlbumsBackend.models import AlbumModel
-from AlbumsBackend.serializers import AlbumSerializer
+from AlbumsBackend.models import AlbumModel, TrackModel
+from AlbumsBackend.serializers import AlbumSerializer, TrackSerializer
 
 
 class AlbumListView(APIView):
@@ -47,5 +47,18 @@ class AlbumDetailView(APIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-class SongListView(APIView):
-    pass
+class TrackListView(APIView):
+    """
+    lists and add tracks on specific album
+    """
+    def get(self, request, pk):
+        tracks = TrackModel.objects.filter(album_id=pk).all()
+        serializer = TrackSerializer(tracks, many=True)
+        return Response(serializer.data)
+
+    def post(self, request, pk):
+        serializer = TrackSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
