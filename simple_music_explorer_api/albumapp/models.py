@@ -15,7 +15,7 @@ class AlbumModel(models.Model):
     genre = models.CharField(max_length=32)
     date = models.DateField(default=date.today)
     description = models.CharField(max_length=512)
-    artist_id = models.ForeignKey('Artist', null=False, on_delete=models.CASCADE)
+    artist = models.ForeignKey('Artist', null=False, on_delete=models.CASCADE)
 
     # TODO: add a cover art
 
@@ -25,7 +25,7 @@ class TrackModel(models.Model):
         unique_together = ['album', 'order']
         ordering = ['order']
 
-    artist_id = models.ForeignKey('Artist', null=False, on_delete=models.CASCADE)
+    artist = models.ForeignKey('Artist', null=False, on_delete=models.CASCADE)
     title = models.CharField(max_length=64, null=False)
     album = models.ForeignKey('AlbumModel', related_name='tracks', null=False, on_delete=models.DO_NOTHING)
     order = models.IntegerField()

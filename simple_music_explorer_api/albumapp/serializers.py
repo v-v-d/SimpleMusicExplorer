@@ -9,7 +9,7 @@ class TrackSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = TrackModel
-        fields = ('id', 'title', 'order', 'artist_id', 'artist_name', 'album')
+        fields = ('id', 'title', 'order', 'artist', 'album')
 
 
 class AlbumSerializer(serializers.ModelSerializer):
@@ -19,4 +19,4 @@ class AlbumSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = AlbumModel
-        fields = ('id', 'title', 'price', 'genre', 'date', 'description', 'artist_name', 'artist_id', 'tracks')
+        fields = ('id', 'artist', 'title', 'price', 'genre', 'date', 'description', 'tracks')
