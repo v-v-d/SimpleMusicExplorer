@@ -24,7 +24,7 @@ class AlbumModel(models.Model):
     date = models.DateField(default=date.today)
     description = models.CharField(max_length=512)
     artist = models.ForeignKey(Artist, null=False, on_delete=models.CASCADE)
-    cover = models.ForeignKey('FileModel', null=False, on_delete=models.CASCADE)
+    cover = models.ManyToManyField(FileModel)
 
 
 class TrackModel(models.Model):
