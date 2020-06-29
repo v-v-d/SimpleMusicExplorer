@@ -1,6 +1,7 @@
 from datetime import date
 
 from django.db import models
+
 from authapp.models import Artist
 
 
@@ -15,7 +16,7 @@ class AlbumModel(models.Model):
     genre = models.CharField(max_length=32)
     date = models.DateField(default=date.today)
     description = models.CharField(max_length=512)
-    artist = models.ForeignKey('Artist', null=False, on_delete=models.CASCADE)
+    artist = models.ForeignKey(Artist, null=False, on_delete=models.CASCADE)
 
     # TODO: add a cover art
 
@@ -25,7 +26,7 @@ class TrackModel(models.Model):
         unique_together = ['album', 'order']
         ordering = ['order']
 
-    artist = models.ForeignKey('Artist', null=False, on_delete=models.CASCADE)
+    artist = models.ForeignKey(Artist, null=False, on_delete=models.CASCADE)
     title = models.CharField(max_length=64, null=False)
     album = models.ForeignKey('AlbumModel', related_name='tracks', null=False, on_delete=models.DO_NOTHING)
     order = models.IntegerField()

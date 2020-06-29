@@ -14,8 +14,11 @@ class AlbumListView(APIView):
     """
     permission_classes = [permissions.IsAuthenticated, IsOwnerOrReadOnly]
 
-    def get(self, request):
-        albums = AlbumModel.objects.all()
+    def get(self, request, artist_id=None):
+        if artist_id:
+            albums = AlbumModel.objects.filter(artist=artist_id).first()
+        else:
+            albums = AlbumModel.objects.all()
         serializer = AlbumSerializer(albums, many=True)
         return Response(serializer.data)
 
