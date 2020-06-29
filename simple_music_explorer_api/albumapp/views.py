@@ -21,12 +21,12 @@ class AlbumsListView(APIView):
 
 class AlbumListView(APIView):
     """
-    list all albums, or create a new one
+    list specific artist albums, or create a new one
     """
     permission_classes = [permissions.IsAuthenticated, IsOwnerOrReadOnly]
 
     def get(self, request, artist_id):
-        albums = AlbumModel.objects.filter(artist=artist_id).first()
+        albums = AlbumModel.objects.filter(artist=artist_id).all()
         serializer = AlbumSerializer(albums, many=True)
         return Response(serializer.data)
 
