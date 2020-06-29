@@ -5,7 +5,7 @@ __pycache__
 *.pyc
 *.sqlite3
 simple_music_explorer_api/conf
-!/simple_music_explorer_api/AlbumsBackend/migrations/
+!/simple_music_explorer_api/,/migrations/
 
 migrations/
 tmp/

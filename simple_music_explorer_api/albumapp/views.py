@@ -1,16 +1,19 @@
-from rest_framework import status
+from rest_framework import status, permissions
 from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from AlbumsBackend.models import AlbumModel, TrackModel
-from AlbumsBackend.serializers import AlbumSerializer, TrackSerializer
+from albumapp.models import AlbumModel, TrackModel
+from albumapp.permissions import IsOwnerOrReadOnly
+from albumapp.serializers import AlbumSerializer, TrackSerializer
 
 
 class AlbumListView(APIView):
     """
     list all albums, or create a new one
     """
+    permission_classes = [permissions.IsAuthenticated, IsOwnerOrReadOnly]
+
     def get(self, request):
         albums = AlbumModel.objects.all()
         serializer = AlbumSerializer(albums, many=True)
@@ -28,6 +31,8 @@ class AlbumDetailView(APIView):
     """
     retrieve, update or delete an album
     """
+    permission_classes = [permissions.IsAuthenticated, IsOwnerOrReadOnly]
+
     def get(self, request, pk):
         album = get_object_or_404(AlbumModel, id=pk)
         serializer = AlbumSerializer(album)
@@ -51,6 +56,8 @@ class TrackListView(APIView):
     """
     lists and add tracks on specific album
     """
+    permission_classes = [permissions.IsAuthenticated, IsOwnerOrReadOnly]
+
     def get(self, request, pk):
         tracks = TrackModel.objects.filter(album_id=pk).all()
         serializer = TrackSerializer(tracks, many=True)
