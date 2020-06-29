@@ -10,7 +10,7 @@ class AlbumModel(models.Model):
             models.CheckConstraint(check=models.Q(price__gte=0), name='price_gte_0'),
         ]
 
-    name = models.CharField(max_length=64, null=False)
+    title = models.CharField(max_length=64, null=False)
     price = models.FloatField(default=0, null=False)
     genre = models.CharField(max_length=32)
     date = models.DateField(default=date.today)
