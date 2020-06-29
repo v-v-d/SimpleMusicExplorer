@@ -1,8 +1,11 @@
 .idea
 venv
-conf/
+simple_music_explorer_api/conf/
 __pycache__
 *.pyc
 *.sqlite3
+simple_music_explorer_api/conf
+!/simple_music_explorer_api/,/migrations/
+
 migrations/
 tmp/

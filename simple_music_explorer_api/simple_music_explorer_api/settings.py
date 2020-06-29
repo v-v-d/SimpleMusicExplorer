@@ -25,7 +25,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/3.0/howto/deployment/checklist/
 
 local_config_path = os.path.join(BASE_DIR, 'conf', 'local.conf')
-config = RawConfigParser()
+config = ConfigParser()
 config.read(local_config_path)
 
 # SECURITY WARNING: keep the secret key used in production secret!
@@ -34,13 +34,8 @@ SECRET_KEY = config.get('main', 'SECRET')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config.getboolean('main', 'DEBUG')
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = []
 
-
-if DEBUG:
-    # EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-    EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
-    EMAIL_FILE_PATH = os.path.join(BASE_DIR, 'tmp\\emails')
 
 # Application definition
 
@@ -58,6 +53,7 @@ INSTALLED_APPS = [
 
     'authapp',
     'merchapp',
+    'albumapp'
 ]
 
 MIDDLEWARE = [
