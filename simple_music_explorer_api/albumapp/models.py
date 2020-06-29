@@ -17,8 +17,7 @@ class AlbumModel(models.Model):
     date = models.DateField(default=date.today)
     description = models.CharField(max_length=512)
     artist = models.ForeignKey(Artist, null=False, on_delete=models.CASCADE)
-
-    # TODO: add a cover art
+    cover = models.ForeignKey('FileModel', null=False, on_delete=models.CASCADE)
 
 
 class TrackModel(models.Model):
@@ -29,7 +28,14 @@ class TrackModel(models.Model):
     artist = models.ForeignKey(Artist, null=False, on_delete=models.CASCADE)
     title = models.CharField(max_length=64, null=False)
     album = models.ForeignKey('AlbumModel', related_name='tracks', null=False, on_delete=models.DO_NOTHING)
-    order = models.IntegerField()
+    order = models.SmallIntegerField()
 
     def __str__(self):
         return '%d: %s' % (self.order, self.title)
+
+
+class FileModel(models.FileField):
+    file = models.FileField(blank=False, null=False, upload_to='images')
+
+    def __str__(self):
+        return self.file.name

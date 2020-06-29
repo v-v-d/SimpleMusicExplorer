@@ -1,11 +1,12 @@
 from rest_framework import status, permissions
 from rest_framework.generics import get_object_or_404
+from rest_framework.parsers import FileUploadParser
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from albumapp.models import AlbumModel, TrackModel
 from albumapp.permissions import IsOwnerOrReadOnly
-from albumapp.serializers import AlbumSerializer, TrackSerializer
+from albumapp.serializers import AlbumSerializer, TrackSerializer, FileSerializer
 
 
 class AlbumListView(APIView):
@@ -72,3 +73,17 @@ class TrackListView(APIView):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class FileUploadView(APIView):
+    permission_classes = [permissions.IsAuthenticated, IsOwnerOrReadOnly]
+    parser_class = [FileUploadParser]
+
+    def post(self, request, *args, **kwargs):
+        file_serializer = FileSerializer(data=request.data)
+
+        if file_serializer.is_valid():
+            file_serializer.save()
+            return Response(file_serializer.data, status=status.HTTP_201_CREATED)
+        else:
+            return Response(file_serializer.errors, status=status.HTTP_400_BAD_REQUEST)

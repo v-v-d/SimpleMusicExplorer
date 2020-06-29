@@ -1,10 +1,14 @@
 from rest_framework import serializers, permissions
-from albumapp.models import AlbumModel, TrackModel
+from albumapp.models import AlbumModel, TrackModel, FileModel
+
+
+class FileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = FileModel
+        fields = ('id', 'file')
 
 
 class TrackSerializer(serializers.ModelSerializer):
-    permission_classes = [permissions.IsAuthenticated, ]
-
     album = serializers.PrimaryKeyRelatedField(queryset=AlbumModel.objects.all())
 
     class Meta:
@@ -13,10 +17,9 @@ class TrackSerializer(serializers.ModelSerializer):
 
 
 class AlbumSerializer(serializers.ModelSerializer):
-    permission_classes = [permissions.IsAuthenticated, ]
-
     tracks = TrackSerializer(many=True, read_only=True)
+    cover = serializers.HyperlinkedRelatedField()
 
     class Meta:
         model = AlbumModel
-        fields = ('id', 'artist', 'title', 'price', 'genre', 'date', 'description', 'tracks')
+        fields = ('id', 'artist', 'title', 'price', 'genre', 'date', 'description', 'tracks', 'cover')
