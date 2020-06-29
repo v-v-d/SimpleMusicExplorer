@@ -9,17 +9,24 @@ from albumapp.permissions import IsOwnerOrReadOnly
 from albumapp.serializers import AlbumSerializer, TrackSerializer, FileSerializer
 
 
+class AlbumsListView(APIView):
+    """
+    list all albums
+    """
+    def get(self, request):
+        albums = AlbumModel.objects.all()
+        serializer = AlbumSerializer(albums, many=True)
+        return Response(serializer.data)
+
+
 class AlbumListView(APIView):
     """
     list all albums, or create a new one
     """
     permission_classes = [permissions.IsAuthenticated, IsOwnerOrReadOnly]
 
-    def get(self, request, artist_id=None):
-        if artist_id:
-            albums = AlbumModel.objects.filter(artist=artist_id).first()
-        else:
-            albums = AlbumModel.objects.all()
+    def get(self, request, artist_id):
+        albums = AlbumModel.objects.filter(artist=artist_id).first()
         serializer = AlbumSerializer(albums, many=True)
         return Response(serializer.data)
 
