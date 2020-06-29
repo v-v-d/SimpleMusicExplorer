@@ -5,6 +5,13 @@ from django.db import models
 from authapp.models import Artist
 
 
+class FileModel(models.Model):
+    file = models.FileField(blank=False, null=False, upload_to='images/albumart')
+
+    def __str__(self):
+        return self.file.name
+
+
 class AlbumModel(models.Model):
     class Meta:
         constraints = [
@@ -32,10 +39,3 @@ class TrackModel(models.Model):
 
     def __str__(self):
         return '%d: %s' % (self.order, self.title)
-
-
-class FileModel(models.FileField):
-    file = models.FileField(blank=False, null=False, upload_to='images')
-
-    def __str__(self):
-        return self.file.name

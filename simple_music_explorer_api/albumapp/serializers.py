@@ -18,7 +18,7 @@ class TrackSerializer(serializers.ModelSerializer):
 
 class AlbumSerializer(serializers.ModelSerializer):
     tracks = TrackSerializer(many=True, read_only=True)
-    cover = serializers.HyperlinkedRelatedField()
+    cover = serializers.HyperlinkedRelatedField(read_only=True, view_name='filemodel-detail')
 
     class Meta:
         model = AlbumModel
