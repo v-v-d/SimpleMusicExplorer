@@ -57,7 +57,7 @@ INSTALLED_APPS = [
     'djoser',
 
     'authapp',
-
+    'merchapp',
 ]
 
 MIDDLEWARE = [
