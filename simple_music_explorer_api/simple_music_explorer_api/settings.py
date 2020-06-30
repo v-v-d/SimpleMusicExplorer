@@ -37,6 +37,11 @@ DEBUG = config.getboolean('main', 'DEBUG')
 ALLOWED_HOSTS = []
 
 
+if DEBUG:
+    # EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+    EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
+    EMAIL_FILE_PATH = os.path.join(BASE_DIR, 'tmp', 'emails')
+
 # Application definition
 
 INSTALLED_APPS = [
@@ -141,7 +146,6 @@ STATICFILES_DIRS = (os.path.join(BASE_DIR, 'static'),)
 MEDIA = 'media'
 MEDIA_URL = f'/{MEDIA}/'
 MEDIA_ROOT = os.path.join(BASE_DIR, MEDIA)
-
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (

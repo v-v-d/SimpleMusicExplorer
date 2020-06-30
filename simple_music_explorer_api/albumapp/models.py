@@ -24,7 +24,10 @@ class AlbumModel(models.Model):
     date = models.DateField(default=date.today)
     description = models.CharField(max_length=512)
     artist = models.ForeignKey(Artist, null=False, on_delete=models.CASCADE)
-    cover = models.ManyToManyField(FileModel)
+    cover = models.ManyToManyField(FileModel, blank=True)
+
+    def __str__(self):
+        return f'{self.title}'
 
 
 class TrackModel(models.Model):

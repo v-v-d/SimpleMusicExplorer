@@ -30,7 +30,7 @@ class AlbumListView(APIView):
         serializer = AlbumSerializer(albums, many=True)
         return Response(serializer.data)
 
-    def post(self, request):
+    def post(self, request, artist_id):
         serializer = AlbumSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
@@ -62,6 +62,10 @@ class AlbumDetailView(APIView):
         album.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
+    def patch(self, request, pk):
+        album = get_object_or_404(AlbumModel, id=pk)
+        pass
+
 
 class TrackListView(APIView):
     """
@@ -69,13 +73,13 @@ class TrackListView(APIView):
     """
     permission_classes = [permissions.IsAuthenticated, IsOwnerOrReadOnly]
 
-    def get(self, request, pk):
+    def get(self, request, pk, artist_id):
         tracks = TrackModel.objects.filter(album_id=pk).all()
         serializer = TrackSerializer(tracks, many=True)
         return Response(serializer.data)
 
-    def post(self, request, pk):
-        serializer = TrackSerializer(data=request.data)
+    def post(self, request, pk, artist_id):
+        serializer = TrackSerializer(data=request.data, many=True)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)

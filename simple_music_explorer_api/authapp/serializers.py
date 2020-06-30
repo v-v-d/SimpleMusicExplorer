@@ -33,7 +33,6 @@ class ArtistCreateSerializer(serializers.ModelSerializer):
 
 
 
-
 # class UserCreateSerializer(BaseUserRegistrationSerializer):
 #
 #     class Meta(BaseUserRegistrationSerializer.Meta):
