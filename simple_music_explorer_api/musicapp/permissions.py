@@ -1,7 +1,5 @@
 from rest_framework import permissions
 
-from musicapp.models import ArtistModel
-
 
 class IsOwnerOrReadOnly(permissions.BasePermission):
     """
