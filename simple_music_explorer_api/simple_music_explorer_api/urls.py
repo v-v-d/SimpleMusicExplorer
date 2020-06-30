@@ -15,11 +15,18 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from rest_framework.schemas import get_schema_view
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('api/v1/auth/', include('authapp.urls')),
-    path('api/v1/music/', include('musicapp.urls')),
-    path('api/v1/merch/', include('merchapp.urls')),
-]
+    path('schema', get_schema_view(
+        title='Simple Music Explorer API',
+        description='Our lovely little API :3',
+        version='0.0.2',
+    ), name='openapi-schema'),
+    path('apiauth/', include('rest_framework.urls')),
 
+    path('admin/', admin.site.urls),
+    path('api/v1/auth/', include('authapp.urls'), name='auth'),
+    path('api/v1/music/', include('musicapp.urls'), name='music'),
+    path('api/v1/merch/', include('merchapp.urls'), name='merch'),
+]
