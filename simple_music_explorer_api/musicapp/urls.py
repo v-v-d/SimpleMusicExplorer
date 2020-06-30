@@ -11,6 +11,6 @@ urlpatterns = [
     path('artist/', views.ArtistView.as_view()),
     path('artist/<int:pk>/', views.ArtistDetail.as_view()),
 
-    path('artist/<int:artist_id>/albums', views.AlbumListView.as_view()),
+    path('artist/<int:pk>/albums', views.AlbumListView.as_view()),
     path('upload_cover', views.FileUploadView.as_view())
 ]
