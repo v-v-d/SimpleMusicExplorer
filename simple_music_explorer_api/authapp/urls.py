@@ -1,14 +1,10 @@
 from django.urls import path, re_path, include
 
-from .views import ArtistListView, ArtistView, ArtistDetail
 
 urlpatterns = [
     path('', include('djoser.urls')),
     path('', include('djoser.urls.authtoken')),
     path('', include('djoser.urls.jwt')),
-    path('artists/', ArtistListView.as_view()),
-    path('artist/', ArtistView.as_view()),
-    path('artist/<int:pk>/', ArtistDetail.as_view()),
 ]
 # /users/
 # /users/me/
