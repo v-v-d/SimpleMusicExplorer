@@ -27,6 +27,6 @@ urlpatterns = [
 
     path('admin/', admin.site.urls),
     path('api/v1/auth/', include('authapp.urls'), name='auth'),
-    path('api/v1/artists/', include('musicapp.urls'), name='artists'),
+    path('api/v1/', include('musicapp.urls'), name='music'),
     path('api/v1/merch/', include('merchapp.urls'), name='merch'),
 ]

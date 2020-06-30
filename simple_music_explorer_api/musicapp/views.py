@@ -19,23 +19,17 @@ class ArtistListView(APIView):
         serializer = ArtistSerializer(artists, many=True)
         return Response(serializer.data)
 
-
-class ArtistView(APIView):
-    """Вывод и создание артиста"""
-
-    permission_classes = [permissions.IsAuthenticated, ]
-
-    def get(self, request):
-        artist = ArtistModel.objects.filter(user=request.user)
-        serializer = ArtistSerializer(artist, many=True)
-        return Response(serializer.data)
-
-    def post(self, request):
-        serialize = ArtistCreateSerializer(data=request.data)
-        if serialize.is_valid():
-            serialize.save(user=request.user)
-            return Response(status=status.HTTP_201_CREATED)
-        return Response(status=status.HTTP_400_BAD_REQUEST)
+#
+# class ArtistView(APIView):
+#     """Вывод и создание артиста"""
+#
+#     permission_classes = [permissions.IsAuthenticated, ]
+#
+#     def get(self, request, pk):
+#         artist = ArtistModel.objects.filter(pk=pk)
+#         serializer = ArtistSerializer(artist, many=True)
+#         return Response(serializer.data)
+#
 
 
 class ArtistDetail(APIView):
@@ -47,6 +41,13 @@ class ArtistDetail(APIView):
         artist = get_object_or_404(ArtistModel, id=pk)
         serializer = ArtistSerializer(artist)
         return Response(serializer.data)
+
+    def post(self, request):
+        serialize = ArtistCreateSerializer(data=request.data)
+        if serialize.is_valid():
+            serialize.save(user=request.user)
+            return Response(status=status.HTTP_201_CREATED)
+        return Response(status=status.HTTP_400_BAD_REQUEST)
 
     def put(self, request, pk):
         artist_update = ArtistModel.objects.filter(id=pk)
