@@ -21,7 +21,7 @@ urlpatterns = [
     path('schema', get_schema_view(
         title='Simple Music Explorer API',
         description='Our lovely little API :3',
-        version='0.0.2',
+        version='0.0.3',
     ), name='openapi-schema'),
     path('apiauth/', include('rest_framework.urls')),
 
