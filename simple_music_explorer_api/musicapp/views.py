@@ -11,7 +11,9 @@ from musicapp.serializers import AlbumSerializer, TrackSerializer, FileSerialize
 
 
 class ArtistListView(APIView):
-    """Вывод списка всех артистов"""
+    """
+    list all artists
+    """
     permission_classes = [permissions.IsAuthenticated, ]
 
     def get(self, request):
@@ -19,27 +21,16 @@ class ArtistListView(APIView):
         serializer = ArtistSerializer(artists, many=True)
         return Response(serializer.data)
 
-#
-# class ArtistView(APIView):
-#     """Вывод и создание артиста"""
-#
-#     permission_classes = [permissions.IsAuthenticated, ]
-#
-#     def get(self, request, pk):
-#         artist = ArtistModel.objects.filter(pk=pk)
-#         serializer = ArtistSerializer(artist, many=True)
-#         return Response(serializer.data)
-#
 
-
-class ArtistDetail(APIView):
-    """Показ, редактирование и удаление одного артиста"""
-
+class UserArtistView(APIView):
+    """
+    create and retrieve user artists
+    """
     permission_classes = [permissions.IsAuthenticated, IsOwnerOrReadOnly]
 
-    def get(self, request, pk):
-        artist = get_object_or_404(ArtistModel, id=pk)
-        serializer = ArtistSerializer(artist)
+    def get(self, request):
+        artist = ArtistModel.objects.filter(user=request.user)
+        serializer = ArtistSerializer(artist, many=True)
         return Response(serializer.data)
 
     def post(self, request):
@@ -48,6 +39,18 @@ class ArtistDetail(APIView):
             serialize.save(user=request.user)
             return Response(status=status.HTTP_201_CREATED)
         return Response(status=status.HTTP_400_BAD_REQUEST)
+
+
+class ArtistDetail(APIView):
+    """
+    retrieve, update and delete artists
+    """
+    permission_classes = [permissions.IsAuthenticated, IsOwnerOrReadOnly]
+
+    def get(self, request, pk):
+        artist = get_object_or_404(ArtistModel, id=pk)
+        serializer = ArtistSerializer(artist)
+        return Response(serializer.data)
 
     def put(self, request, pk):
         artist_update = ArtistModel.objects.filter(id=pk)
@@ -67,6 +70,8 @@ class AlbumsListView(APIView):
     """
     list all albums
     """
+    permission_classes = [permissions.IsAuthenticated, ]
+
     def get(self, request):
         albums = AlbumModel.objects.all()
         serializer = AlbumSerializer(albums, many=True)
