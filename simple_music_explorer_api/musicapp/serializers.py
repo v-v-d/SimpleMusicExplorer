@@ -1,6 +1,7 @@
-from rest_framework import serializers, permissions
-from musicapp.models import AlbumModel, TrackModel, FileModel, ArtistModel
+from rest_framework import serializers
+
 from authapp.serializers import UserSerializer
+from musicapp.models import AlbumModel, TrackModel, FileModel, ArtistModel
 
 
 class FileSerializer(serializers.ModelSerializer):

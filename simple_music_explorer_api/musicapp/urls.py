@@ -3,14 +3,14 @@ from django.urls import path
 from musicapp import views
 
 urlpatterns = [
-    path('', views.AlbumsListView.as_view()),
-    path('<int:pk>', views.AlbumDetailView.as_view()),
-    path('<int:pk>/tracks', views.TrackListView.as_view()),
+    path('album/all', views.AlbumsListView.as_view(), name='albums'),
+    path('album/<int:pk>', views.AlbumDetailView.as_view(), name='album'),
+    path('album/<int:pk>/tracks', views.TrackListView.as_view(), name='tracks'),
 
-    path('artists/', views.ArtistListView.as_view()),
-    path('artist/', views.ArtistView.as_view()),
-    path('artist/<int:pk>/', views.ArtistDetail.as_view()),
+    path('all', views.ArtistListView.as_view(), name='artists_all'),
+    path('', views.ArtistView.as_view(), name='artist'),
+    path('<int:pk>/', views.ArtistDetail.as_view(), name='artist_detail'),
+    path('<int:pk>/albums', views.AlbumListView.as_view(), name='artist_albums'),
 
-    path('artist/<int:artist_id>/albums', views.AlbumListView.as_view()),
-    path('upload_cover', views.FileUploadView.as_view())
+    path('upload_cover', views.FileUploadView.as_view(), name='upload_cover')
 ]

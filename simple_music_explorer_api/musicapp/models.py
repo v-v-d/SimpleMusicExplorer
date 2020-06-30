@@ -18,6 +18,7 @@ class ArtistModel(models.Model):
     location = models.CharField(max_length=128, blank=True)
     bio = models.CharField(max_length=512, blank=True)
     website = models.CharField(max_length=32, blank=True)
+    logo = models.ManyToManyField(FileModel, blank=True)
 
     def __str__(self):
         return self.name
