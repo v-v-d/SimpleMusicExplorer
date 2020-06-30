@@ -4,9 +4,62 @@ from rest_framework.parsers import FileUploadParser
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from albumapp.models import AlbumModel, TrackModel
-from albumapp.permissions import IsOwnerOrReadOnly
-from albumapp.serializers import AlbumSerializer, TrackSerializer, FileSerializer
+from musicapp.models import AlbumModel, TrackModel, ArtistModel
+from musicapp.permissions import IsOwnerOrReadOnly, CustomerAccessPermission
+from musicapp.serializers import AlbumSerializer, TrackSerializer, FileSerializer, ArtistSerializer, \
+    ArtistCreateSerializer
+
+
+class ArtistListView(APIView):
+    """Вывод списка всех артистов"""
+    permission_classes = [permissions.IsAuthenticated, ]
+
+    def get(self, request):
+        artists = ArtistModel.objects.all()
+        serializer = ArtistSerializer(artists, many=True)
+        return Response(serializer.data)
+
+
+class ArtistView(APIView):
+    """Вывод и создание артиста"""
+
+    permission_classes = [permissions.IsAuthenticated, ]
+
+    def get(self, request):
+        artist = ArtistModel.objects.filter(user=request.user)
+        serializer = ArtistSerializer(artist, many=True)
+        return Response(serializer.data)
+
+    def post(self, request):
+        serialize = ArtistCreateSerializer(data=request.data)
+        if serialize.is_valid():
+            serialize.save(user=request.user)
+            return Response(status=201)
+        return Response(status=400)
+
+
+class ArtistDetail(APIView):
+    """Показ, редактирование и удаление одного артиста"""
+
+    permission_classes = [permissions.IsAuthenticated, CustomerAccessPermission]
+
+    def get(self, request, pk):
+        artist = get_object_or_404(ArtistModel, id=pk)
+        serializer = ArtistSerializer(artist)
+        return Response(serializer.data)
+
+    def put(self, request, pk):
+        artist_update = ArtistModel.objects.filter(id=pk)
+        serialize = ArtistCreateSerializer(data=request.data)
+        if serialize.is_valid():
+            artist_update.update(**serialize.validated_data)
+            return Response(status=201)
+        return Response(status=400)
+
+    def delete(self, request, pk):
+        artist_delete = ArtistModel.objects.filter(id=pk)
+        artist_delete.delete()
+        return Response(status=204)
 
 
 class AlbumsListView(APIView):
@@ -73,12 +126,12 @@ class TrackListView(APIView):
     """
     permission_classes = [permissions.IsAuthenticated, IsOwnerOrReadOnly]
 
-    def get(self, request, pk, artist_id):
+    def get(self, request, pk):
         tracks = TrackModel.objects.filter(album_id=pk).all()
         serializer = TrackSerializer(tracks, many=True)
         return Response(serializer.data)
 
-    def post(self, request, pk, artist_id):
+    def post(self, request, pk):
         serializer = TrackSerializer(data=request.data, many=True)
         if serializer.is_valid():
             serializer.save()

@@ -1,5 +1,6 @@
 from rest_framework import serializers, permissions
-from albumapp.models import AlbumModel, TrackModel, FileModel
+from musicapp.models import AlbumModel, TrackModel, FileModel, ArtistModel
+from authapp.serializers import UserSerializer
 
 
 class FileSerializer(serializers.ModelSerializer):
@@ -30,3 +31,24 @@ class AlbumSerializer(serializers.ModelSerializer):
     class Meta:
         model = AlbumModel
         fields = ('id', 'artist', 'title', 'price', 'genre', 'date', 'description', 'tracks', 'cover')
+
+
+class ArtistSerializer(serializers.ModelSerializer):
+    """Сериализация артиста"""
+    user = UserSerializer()
+
+    class Meta:
+        model = ArtistModel
+        fields = ('id', 'user', 'name', 'location', 'bio', 'website')
+
+
+class ArtistCreateSerializer(serializers.ModelSerializer):
+    """Сериализация автиста"""
+
+    class Meta:
+        model = ArtistModel
+        fields = ('name', 'location', 'bio', 'website')
+
+    def create(self, validated_data):
+        artist = ArtistModel.objects.update_or_create(**validated_data)
+        return artist

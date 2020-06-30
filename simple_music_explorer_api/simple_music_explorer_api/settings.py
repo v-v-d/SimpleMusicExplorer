@@ -58,7 +58,7 @@ INSTALLED_APPS = [
 
     'authapp',
     'merchapp',
-    'albumapp'
+    'musicapp'
 ]
 
 MIDDLEWARE = [

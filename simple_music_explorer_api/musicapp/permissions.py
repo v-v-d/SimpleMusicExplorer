@@ -1,4 +1,5 @@
 from rest_framework import permissions
+from musicapp.models import ArtistModel
 
 
 class IsOwnerOrReadOnly(permissions.BasePermission):
@@ -14,3 +15,16 @@ class IsOwnerOrReadOnly(permissions.BasePermission):
 
         # Write permissions are only allowed to the owner of the object.
         return obj.artist.user == request.user
+
+
+class CustomerAccessPermission(permissions.BasePermission):
+
+    def has_permission(self, request, view):
+        if request.method == 'GET':
+            return True
+
+        pk = request.parser_context['kwargs']['pk']
+        user = ArtistModel.objects.filter(id=pk).first()
+        if user and user.user_id == request.user.id and request.user.is_artist:
+            return True
+        return False
