@@ -142,6 +142,19 @@ class TrackListView(APIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+    def patch(self, request, pk):
+        track = get_object_or_404(TrackModel, id=pk)
+        serialize = TrackSerializer(track, data=request.data, partial=True)
+        if serialize.is_valid():
+            track.save()
+            return Response(status=status.HTTP_201_CREATED)
+        return Response(status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, pk):
+        track = TrackModel.objects.filter(pk=pk).all()
+        track.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
 
 class FileUploadView(APIView):
     permission_classes = [permissions.IsAuthenticated, IsOwnerOrReadOnly]
