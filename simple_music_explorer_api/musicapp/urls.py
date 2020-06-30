@@ -3,7 +3,7 @@ from django.urls import path
 from musicapp import views
 
 urlpatterns = [
-    path('albums/all', views.AlbumsListView.as_view(), name='albums'),
+    path('albums', views.AlbumsListView.as_view(), name='albums'),
     path('albums/<int:pk>', views.AlbumDetailView.as_view(), name='album'),
     path('albums/<int:pk>/tracks', views.TrackListView.as_view(), name='tracks'),
 
