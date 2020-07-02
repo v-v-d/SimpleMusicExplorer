@@ -77,12 +77,13 @@ class OrderItemManager(models.QuerySet):
 
 class OrderItem(ActiveModels):
     """Товар в заказе"""
-    album_product = models.ForeignKey(AlbumModel, on_delete=models.PROTECT, blank=True)
-    merch_product = models.ForeignKey(Product, on_delete=models.PROTECT, blank=True)
+    merch_product = models.ForeignKey(Product, on_delete=models.PROTECT, default=None, blank=True, null=True)
+    album_product = models.ForeignKey(AlbumModel, on_delete=models.PROTECT, default=None, blank=True, null=True)
+
     price = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     quantity = models.PositiveIntegerField(default=0, null=False, blank=True)
-    invoices = models.ForeignKey(Order, null=False, on_delete=models.CASCADE, related_name='orders_item')
-    
+    orders = models.ForeignKey(Order, null=False, on_delete=models.CASCADE, related_name='orders_item')
+
     objects = OrderItemManager.as_manager()
 
     def clean(self):
