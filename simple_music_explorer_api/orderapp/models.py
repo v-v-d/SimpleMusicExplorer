@@ -65,8 +65,8 @@ class OrderManager(models.QuerySet):
 
 class Order(models.Model):
     """Товар в счете"""
-    album_product = models.ForeignKey(AlbumModel, on_delete=models.CASCADE, blank=True)
-    merch_product = models.ForeignKey(Product, on_delete=models.CASCADE, blank=True)
+    album_product = models.ForeignKey(AlbumModel, on_delete=models.PROTECT, blank=True)
+    merch_product = models.ForeignKey(Product, on_delete=models.PROTECT, blank=True)
     price = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     quantity = models.PositiveIntegerField(default=0, null=False, blank=True)
     invoices = models.ForeignKey(Invoice, null=False, on_delete=models.CASCADE, related_name='orders')
