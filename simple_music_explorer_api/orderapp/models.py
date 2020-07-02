@@ -1,7 +1,9 @@
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import F, Sum
 
 from authapp.models import User
+from merchapp.models import Product
 from musicapp.models import AlbumModel
 
 
@@ -63,15 +65,20 @@ class OrderManager(models.QuerySet):
 
 class Order(models.Model):
     """Товар в счете"""
-
-    type_product = models.CharField(max_length=1, choices=[('a', 'albom'), ('m', 'merch')])
-    product = models.IntegerField(null=False)   # id товара
+    album_product = models.ForeignKey(AlbumModel, on_delete=models.CASCADE, blank=True)
+    merch_product = models.ForeignKey(Product, on_delete=models.CASCADE, blank=True)
     price = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     quantity = models.PositiveIntegerField(default=0, null=False, blank=True)
     invoices = models.ForeignKey(Invoice, null=False, on_delete=models.CASCADE, related_name='orders')
     date = models.DateTimeField(auto_now_add=True, blank=False)
     date_modif = models.DateTimeField(auto_now=True, blank=True)
     objects = OrderManager.as_manager()
+
+    def clean(self):
+        if self.album_product and self.merch_product:
+            raise ValidationError('Только одно из полей (album_product, merch_product) должно быть заполнено')
+        if self.album_product is None and self.merch_product is None:
+            raise ValidationError('Одно поле должно быть заполнено обязательно, album_product или merch_product')
 
     def get_summ(self):
         return (self.price or 0) * (self.quantity or 0)
