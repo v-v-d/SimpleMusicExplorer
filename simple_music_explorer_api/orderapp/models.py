@@ -7,7 +7,13 @@ from merchapp.models import Product
 from musicapp.models import AlbumModel
 
 
-class InvoiceManager(models.QuerySet):
+class ActiveModels(models.Model):
+    active = models.BooleanField(default=True)
+    date = models.DateTimeField(auto_now_add=True, blank=False)
+    date_modif = models.DateTimeField(auto_now=True, blank=True)
+
+
+class OrderManager(models.QuerySet):
 
     def active(self):
         return self.filter(active=True)
@@ -23,24 +29,30 @@ class InvoiceManager(models.QuerySet):
             return invoice
 
 
-class Invoice(models.Model):
+class Order(ActiveModels):
     """Заказ"""
 
-    date = models.DateTimeField(auto_now_add=True, blank=False)
-    date_modif = models.DateTimeField(auto_now=True, blank=True)
-    owner = models.ForeignKey(User, null=True, related_name='invoices', on_delete=models.CASCADE)
+    first_name = models.CharField(max_length=25, blank=True)
+    last_name = models.CharField(max_length=25, blank=True)
+    email = models.EmailField(blank=True)
+    address = models.CharField(max_length=150, blank=True)
+    postal_code = models.CharField(max_length=20, blank=True)
+    city = models.CharField(max_length=100, blank=True)
+
+
+    owner = models.ForeignKey(User, null=True, related_name='orders', on_delete=models.CASCADE)
     status = models.CharField(max_length=3, choices=[], default='', blank=True)  # оплачен, не оплачен
 
-    objects = InvoiceManager.as_manager()
+    objects = OrderManager.as_manager()
 
     def get_summ(self):
-        return self.orders.total_summ()
+        return self.orders_item.total_summ()
 
     def get_quantity(self):
-        return self.orders.total_quantity()
+        return self.orders_item.total_quantity()
 
 
-class OrderManager(models.QuerySet):
+class OrderItemManager(models.QuerySet):
 
     def get_queryset(self):
         return super().get_queryset().active()
@@ -63,16 +75,15 @@ class OrderManager(models.QuerySet):
         return self.aggregate(total_summ=Sum(F('quantity') * F('price'), output_field=models.DecimalField()))['total_summ'] or 0.00
 
 
-class Order(models.Model):
-    """Товар в счете"""
+class OrderItem(ActiveModels):
+    """Товар в заказе"""
     album_product = models.ForeignKey(AlbumModel, on_delete=models.PROTECT, blank=True)
     merch_product = models.ForeignKey(Product, on_delete=models.PROTECT, blank=True)
     price = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     quantity = models.PositiveIntegerField(default=0, null=False, blank=True)
-    invoices = models.ForeignKey(Invoice, null=False, on_delete=models.CASCADE, related_name='orders')
-    date = models.DateTimeField(auto_now_add=True, blank=False)
-    date_modif = models.DateTimeField(auto_now=True, blank=True)
-    objects = OrderManager.as_manager()
+    invoices = models.ForeignKey(Order, null=False, on_delete=models.CASCADE, related_name='orders_item')
+    
+    objects = OrderItemManager.as_manager()
 
     def clean(self):
         if self.album_product and self.merch_product:
