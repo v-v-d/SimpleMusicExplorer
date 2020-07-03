@@ -18,7 +18,11 @@ export default {
         }
       })
         .then(response => {
-          response.status === 201 ? ctx.commit('updateAuthErrorStatus', false) : throw Error(response.statusText);
+          if (response.status !== 201) {
+            throw Error(`${response.status}: ${response.statusText}`);
+          }
+
+          ctx.commit('updateAuthErrorStatus', false);
         })
         .catch(error => {
           ctx.commit('updateAuthErrorMessage', error.message);
@@ -36,7 +40,7 @@ export default {
       })
         .then(response => {
           if (response.status !== 204) {
-            throw Error(response.statusText);
+            throw Error(`${response.status}: ${response.statusText}`);
           }
 
           ctx.commit('updateUserActiveStatus', true);
@@ -57,7 +61,13 @@ export default {
           'Content-type': 'application/json',
         }
       })
-        .then(response => response.ok ? response.json() : throw Error(response.statusText))
+        .then(response => {
+          if (!response.ok) {
+            throw Error(`${response.status}: ${response.statusText}`);
+          }
+
+          return response.json();
+        })
         .then(tokenObj => {
           const token = tokenObj['auth_token'];
           localStorage.setItem('token', `Token ${token}`);
@@ -79,7 +89,13 @@ export default {
             'Authorization': ctx.getters.token,
           },
         })
-          .then(response => response.ok ? response.json() : throw Error(response.statusText))
+          .then(response => {
+            if (!response.ok) {
+              throw Error(`${response.status}: ${response.statusText}`);
+            }
+
+            return response.json();
+          })
           .then(user => {
             ctx.commit('updateUser', user);
             ctx.commit('updateAuthErrorStatus', false);
@@ -106,7 +122,7 @@ export default {
         })
           .then(response => {
             if (response.status !== 204) {
-              throw Error(response.statusText);
+              throw Error(`${response.status}: ${response.statusText}`);
             }
 
             localStorage.removeItem('token');
