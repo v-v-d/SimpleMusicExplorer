@@ -26,6 +26,29 @@ export default {
         });
     },
 
+    activate(ctx, data) {
+      fetch('/api/v1/auth/users/activation/', {
+        method: 'POST',
+        body: JSON.stringify(data),
+        headers: {
+          'Content-type': 'application/json',
+        }
+      })
+        .then(response => {
+          if (response.status !== 204) {
+            throw Error(response.statusText);
+          }
+
+          ctx.commit('updateUserActiveStatus', true);
+          ctx.commit('updateAuthErrorStatus', false);
+          // return response.json();
+        })
+        .catch(error => {
+          ctx.commit('updateAuthErrorMessage', error.message);
+          ctx.commit('updateAuthErrorStatus', true);
+        });
+    },
+
     signIn(ctx, data) {
       fetch('/api/v1/auth/token/login/', {
         method: 'POST',
@@ -111,6 +134,10 @@ export default {
       state.user = user;
     },
 
+    updateUserActiveStatus(state, status) {
+      state.userActiveStatus = status;
+    },
+
     updateAuthErrorStatus(state, errorStatus) {
       state.hasAuthError = errorStatus;
     },
@@ -122,6 +149,7 @@ export default {
   state: {
     token: '',
     user: {},
+    userActiveStatus: false,
     hasAuthError: false,
     authErrorMessage: '',
   },
@@ -136,6 +164,10 @@ export default {
 
     user(state) {
       return state.user;
+    },
+
+    isUserActive(state) {
+      return state.userActiveStatus;
     },
 
     isUser(state) {
