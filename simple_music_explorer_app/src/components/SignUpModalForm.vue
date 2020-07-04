@@ -4,9 +4,11 @@
         id="modal-sign-up"
         scrollable
         title="Sign Up Form"
-        @hidden="onHidden"
+        @hidden="resetFormValues"
+        @cancel="resetFormValues"
+        @ok="onOk"
     >
-      <b-form @submit.stop.prevent="onSubmit" @reset.stop.prevent="onReset" v-if="show">
+      <b-form @submit.stop.prevent="handleSubmit">
         <b-form-group
             id="input-group-1"
             label="Username:"
@@ -73,8 +75,8 @@
         >
           <b-form-input
               id="input-4"
-              v-model="$v.form.password2.$model"
-              :state="validateState('password2')"
+              v-model="$v.form.re_password.$model"
+              :state="validateState('re_password')"
               aria-describedby="input-live-feedback"
               type="password"
               placeholder="Enter password one more time"
@@ -85,31 +87,35 @@
             Passwords must be the same.
           </b-form-invalid-feedback>
         </b-form-group>
-
-        <b-button type="submit" variant="primary">Submit</b-button>
-        <b-button type="reset" variant="danger">Reset</b-button>
       </b-form>
 
-      <h5 v-if="!show && authErrorStatus">
-        Sending activation email failed. Try to sign up again.
-      </h5>
-
-      <h5 v-if="!show && !authErrorStatus" class="msg">Please check your email.</h5>
-      <div v-if="!show" class="w-100">
-        <b-button
-          variant="secondary"
-          class="float-right"
-          @click="onClose"
-        >
-          Close
+      <template v-slot:modal-footer="{ ok, cancel }">
+        <!-- Emulate built in modal footer ok and cancel button actions -->
+        <b-button @click="cancel()">
+          Cancel
         </b-button>
-      </div>
-
-      <template v-slot:modal-footer>
-        <p> </p>
+        <b-button variant="success" @click="ok()">
+          Sign Up
+        </b-button>
       </template>
 
     </b-modal>
+
+    <div class="d-flex justify-content-center mb-3">
+      <b-spinner
+          v-if="isApiStatusLoading"
+          variant="primary"
+          label="Loading..."
+      />
+    </div>
+
+    <b-alert v-model="isApiStatusError" variant="danger" dismissible>
+      Can't get data from server. Error: {{ authErrorMsg }}
+    </b-alert>
+
+    <b-alert v-model="isApiStatusLoaded" variant="success" dismissible>
+      Please check your email for account activation.
+    </b-alert>
   </div>
 </template>
 
@@ -119,6 +125,7 @@
     required, minLength, maxLength, email, sameAs, alphaNum
   } from "vuelidate/lib/validators";
   import { mapGetters, mapActions } from 'vuex';
+  import apiStatusList from "@/store/apiStatusList";
 
   export default {
     name: "SignUpModalForm",
@@ -129,9 +136,8 @@
           username: '',
           email: '',
           password: '',
-          password2: '',
+          re_password: '',
         },
-        show: true,
       }
     },
     validations: {
@@ -150,56 +156,61 @@
           maxLength: maxLength(20),
           alphaNum,
         },
-        password2: {
+        re_password: {
           required,
           sameAsPassword: sameAs('password'),
         },
       },
     },
-    computed: mapGetters(['authErrorStatus']),
+    computed: {
+      ...mapGetters(['authErrorStatus', 'authErrorMsg', 'authApiStatus']),
+
+      isApiStatusLoading() {
+        return +this.authApiStatus === apiStatusList.LOADING;
+      },
+
+      isApiStatusLoaded() {
+        return +this.authApiStatus === apiStatusList.LOADED;
+      },
+
+      isApiStatusError() {
+        return +this.authApiStatus === apiStatusList.ERROR;
+      },
+    },
     methods: {
-      ...mapActions(['getToken']),
+      ...mapActions(['signUp']),
 
-      onSubmit() {
-        if (this.isFieldsValid()) {
-          const payload = {
-            data: this.form,
-            url: '/api/auth/register/',
-          }
-          this.getToken(payload);
-          this.show = false;
+      onOk(bvModalEvt) {
+        bvModalEvt.preventDefault();
+        this.handleSubmit();
+      },
+
+      handleSubmit() {
+        this.$v.$touch();
+
+        if (!this.isFieldsInvalid()) {
+          this.signUp(this.form);
         }
+
+        this.$nextTick(() => {
+          this.$bvModal.hide('modal-sign-up')
+        });
       },
 
-      isFieldsValid() {
-        return Object.keys(this.form).some(key => !this.$v.form[key].$invalid)
+      isFieldsInvalid() {
+        return Object.keys(this.form).some(key => this.$v.form[key].$invalid)
       },
 
-      onReset() {
-        this.resetFormValues();
-      },
-      
       resetFormValues() {
         Object.keys(this.form).forEach(key => {
           if (this.form[key]) {
-            this.form[key] = ''
+            this.form[key] = '';
           }
+
+          this.$nextTick(() => {
+            this.$v.$reset();
+          });
         });
-
-        this.$nextTick(() => {
-          this.$v.$reset();
-        });
-      },
-
-      onHidden() {
-        this.resetFormValues();
-        this.show = true;
-      },
-
-      onClose() {
-        this.resetFormValues();
-        this.$bvModal.hide('modal-sign-up');
-        this.show = true;
       },
 
       validateState(key) {
@@ -211,11 +222,5 @@
 </script>
 
 <style scoped>
-  .btn {
-    margin-right: 10px !important;
-  }
 
-  .msg {
-    text-align: center;
-  }
 </style>

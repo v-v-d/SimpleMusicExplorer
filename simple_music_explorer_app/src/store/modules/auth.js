@@ -1,4 +1,5 @@
 'use strict';
+import apiStatusList from "@/store/apiStatusList";
 
 export default {
   actions: {
@@ -10,7 +11,9 @@ export default {
     },
 
     signUp(ctx, data) {
-      fetch('/api/v1/auth/users/', {
+      ctx.commit('updateAuthApiStatus', apiStatusList.LOADING);
+
+      fetch('http://127.0.0.1:8000/api/v1/auth/users/', {
         method: 'POST',
         body: JSON.stringify(data),
         headers: {
@@ -22,16 +25,20 @@ export default {
             throw Error(`${response.status}: ${response.statusText}`);
           }
 
+          ctx.commit('updateAuthApiStatus', apiStatusList.LOADED);
           ctx.commit('updateAuthErrorStatus', false);
         })
         .catch(error => {
+          ctx.commit('updateAuthApiStatus', apiStatusList.ERROR);
           ctx.commit('updateAuthErrorMessage', error.message);
           ctx.commit('updateAuthErrorStatus', true);
         });
     },
 
     activate(ctx, data) {
-      fetch('/api/v1/auth/users/activation/', {
+      ctx.commit('updateAuthApiStatus', apiStatusList.LOADING);
+
+      fetch('http://127.0.0.1:8000/api/v1/auth/users/activation/', {
         method: 'POST',
         body: JSON.stringify(data),
         headers: {
@@ -43,18 +50,21 @@ export default {
             throw Error(`${response.status}: ${response.statusText}`);
           }
 
+          ctx.commit('updateAuthApiStatus', apiStatusList.LOADED);
           ctx.commit('updateUserActiveStatus', true);
           ctx.commit('updateAuthErrorStatus', false);
-          // return response.json();
         })
         .catch(error => {
+          ctx.commit('updateAuthApiStatus', apiStatusList.ERROR);
           ctx.commit('updateAuthErrorMessage', error.message);
           ctx.commit('updateAuthErrorStatus', true);
         });
     },
 
     signIn(ctx, data) {
-      fetch('/api/v1/auth/token/login/', {
+      ctx.commit('updateAuthApiStatus', apiStatusList.LOADING);
+
+      fetch('http://127.0.0.1:8000/api/v1/auth/token/login/', {
         method: 'POST',
         body: JSON.stringify(data),
         headers: {
@@ -76,6 +86,7 @@ export default {
           ctx.dispatch('getUser');
         })
         .catch(error => {
+          ctx.commit('updateAuthApiStatus', apiStatusList.ERROR);
           ctx.commit('updateAuthErrorMessage', error.message);
           ctx.commit('updateAuthErrorStatus', true);
         });
@@ -83,7 +94,7 @@ export default {
 
     getUser(ctx) {
       if (ctx.getters.isToken) {
-        fetch('/api/v1/auth/users/me/', {
+        fetch('http://127.0.0.1:8000/api/v1/auth/users/me/', {
           headers: {
             'Content-type': 'application/json',
             'Authorization': ctx.getters.token,
@@ -97,14 +108,17 @@ export default {
             return response.json();
           })
           .then(user => {
+            ctx.commit('updateAuthApiStatus', apiStatusList.LOADED);
             ctx.commit('updateUser', user);
             ctx.commit('updateAuthErrorStatus', false);
           })
           .catch(error => {
+            ctx.commit('updateAuthApiStatus', apiStatusList.ERROR);
             ctx.commit('updateAuthErrorMessage', error.message);
             ctx.commit('updateAuthErrorStatus', true);
           })
       } else {
+        ctx.commit('updateAuthApiStatus', apiStatusList.ERROR);
         const message = 'Token is not exists';
         ctx.commit('updateAuthErrorMessage', message);
         ctx.commit('updateAuthErrorStatus', true);
@@ -112,8 +126,10 @@ export default {
     },
 
     signOut(ctx) {
+      ctx.commit('updateAuthApiStatus', apiStatusList.LOADING);
+
       if (ctx.getters.isToken) {
-        fetch('/api/v1/auth/token/logout/', {
+        fetch('http://127.0.0.1:8000/api/v1/auth/token/logout/', {
           method: 'POST',
           headers: {
             'Content-type': 'application/json',
@@ -128,13 +144,16 @@ export default {
             localStorage.removeItem('token');
             ctx.commit('updateToken', '');
             ctx.commit('updateUser', {});
+            ctx.commit('updateAuthApiStatus', apiStatusList.LOADED);
             ctx.commit('updateAuthErrorStatus', false);
           })
           .catch(error => {
+            ctx.commit('updateAuthApiStatus', apiStatusList.ERROR);
             ctx.commit('updateAuthErrorMessage', error.message);
             ctx.commit('updateAuthErrorStatus', true);
           });
       } else {
+        ctx.commit('updateAuthApiStatus', apiStatusList.ERROR);
         const message = 'Token is not exists';
         ctx.commit('updateAuthErrorMessage', message);
         ctx.commit('updateAuthErrorStatus', true);
@@ -142,6 +161,10 @@ export default {
     },
   },
   mutations: {
+    updateAuthApiStatus(state, apiStatus) {
+      state.authApiStatus = apiStatus;
+    },
+
     updateToken(state, token) {
       state.token = token;
     },
@@ -163,6 +186,7 @@ export default {
     },
   },
   state: {
+    authApiStatus: apiStatusList.INIT,
     token: '',
     user: {},
     userActiveStatus: false,
@@ -170,6 +194,10 @@ export default {
     authErrorMessage: '',
   },
   getters: {
+    authApiStatus(state) {
+      return state.authApiStatus;
+    },
+
     token(state) {
       return state.token;
     },

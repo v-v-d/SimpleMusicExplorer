@@ -1,7 +1,9 @@
 <template>
   <div>
     <b-navbar toggleable="lg" type="dark" variant="secondary">
-      <b-navbar-brand :to="{ name: 'albums' }" class="logo-link">Simple Music Explorer</b-navbar-brand>
+      <b-navbar-brand :to="{ name: 'Index' }" class="logo-link">
+        Simple Music Explorer
+      </b-navbar-brand>
 
       <b-navbar-toggle target="nav-collapse"></b-navbar-toggle>
 
@@ -28,10 +30,6 @@
           </b-nav-form>
 
           <b-nav-item-dropdown right>
-
-            <SignInModalForm/>
-            <SignUpModalForm/>
-
             <!-- Using 'button-content' slot -->
             <template v-slot:button-content>
               <em>User</em>
@@ -46,6 +44,9 @@
         </b-navbar-nav>
       </b-collapse>
     </b-navbar>
+
+    <SignInModalForm/>
+    <SignUpModalForm/>
   </div>
 </template>
 
@@ -60,8 +61,8 @@
       SignInModalForm,
       SignUpModalForm,
     },
-    computed: mapGetters(['isArtist', 'isToken', 'query']),
-    methods: mapActions(['signOut', 'filterAlbums', 'changeQuery']),
+    computed: mapGetters(['isToken']),
+    methods: mapActions(['signOut']),
   }
 </script>
 
