@@ -9,6 +9,8 @@
         @ok="onOk"
     >
       <b-form @submit.stop.prevent="handleSubmit">
+
+        <!-- Username input -->
         <b-form-group
             id="input-group-1"
             label="Username:"
@@ -31,6 +33,7 @@
 
         </b-form-group>
 
+        <!-- Email input -->
         <b-form-group
             id="input-group-2"
             label="Email:"
@@ -53,6 +56,7 @@
           </b-form-invalid-feedback>
         </b-form-group>
 
+        <!-- Password input -->
         <b-form-group
             id="input-group-3"
             label="Password:"
@@ -68,6 +72,7 @@
           ></b-form-input>
         </b-form-group>
 
+        <!-- Re_password input -->
         <b-form-group
             id="input-group-4"
             label="Repeat password:"
@@ -87,8 +92,10 @@
             Passwords must be the same.
           </b-form-invalid-feedback>
         </b-form-group>
+
       </b-form>
 
+      <!-- Customized modal buttons -->
       <template v-slot:modal-footer="{ ok, cancel }">
         <!-- Emulate built in modal footer ok and cancel button actions -->
         <b-button @click="cancel()">
@@ -101,21 +108,25 @@
 
     </b-modal>
 
-    <div class="d-flex justify-content-center mb-3">
+    <!-- API status messages -->
+    <div>
+      <div class="d-flex justify-content-center mb-3">
       <b-spinner
-          v-if="isApiStatusLoading"
+          v-if="isSignUpApiStatusLoading"
           variant="primary"
           label="Loading..."
       />
+      </div>
+
+      <b-alert v-model="isSignUpApiStatusError" variant="danger" dismissible>
+        Can't get data from server. Error: {{ authErrorMsg }}
+      </b-alert>
+
+      <b-alert v-model="isSignUpApiStatusLoaded" variant="success" dismissible>
+        Please check your email for account activation.
+      </b-alert>
     </div>
 
-    <b-alert v-model="isApiStatusError" variant="danger" dismissible>
-      Can't get data from server. Error: {{ authErrorMsg }}
-    </b-alert>
-
-    <b-alert v-model="isApiStatusLoaded" variant="success" dismissible>
-      Please check your email for account activation.
-    </b-alert>
   </div>
 </template>
 
@@ -163,18 +174,18 @@
       },
     },
     computed: {
-      ...mapGetters(['authErrorStatus', 'authErrorMsg', 'authApiStatus']),
+      ...mapGetters(['signUpApiStatus', 'authErrorMsg']),
 
-      isApiStatusLoading() {
-        return +this.authApiStatus === apiStatusList.LOADING;
+      isSignUpApiStatusLoading() {
+        return +this.signUpApiStatus === apiStatusList.LOADING;
       },
 
-      isApiStatusLoaded() {
-        return +this.authApiStatus === apiStatusList.LOADED;
+      isSignUpApiStatusLoaded() {
+        return +this.signUpApiStatus === apiStatusList.LOADED;
       },
 
-      isApiStatusError() {
-        return +this.authApiStatus === apiStatusList.ERROR;
+      isSignUpApiStatusError() {
+        return +this.signUpApiStatus === apiStatusList.ERROR;
       },
     },
     methods: {
