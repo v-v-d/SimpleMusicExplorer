@@ -1,12 +1,18 @@
 <template>
   <div>
-    <b-spinner v-if="loading" variant="primary" label="Spinning"></b-spinner>
+    <div class="d-flex justify-content-center mb-3">
+      <b-spinner
+          v-if="isActivationApiStatusLoading"
+          variant="primary"
+          label="Loading..."
+      />
+    </div>
 
-    <b-alert v-model="authErrorStatus" variant="danger">
+    <b-alert v-model="isActivationApiStatusError" variant="danger" dismissible>
       Can't get data from server. Error: {{ authErrorMsg }}
     </b-alert>
 
-    <b-alert v-model="isUserActive" variant="success">
+    <b-alert v-model="isActivationApiStatusLoaded" variant="success" dismissible>
       Account activation succeeded! Now sign in please.
     </b-alert>
   </div>
@@ -14,6 +20,7 @@
 
 <script>
   import { mapGetters, mapActions } from 'vuex';
+  import apiStatusList from "@/store/apiStatusList";
 
   export default {
     name: "UserActivation",
@@ -23,7 +30,21 @@
         loading: false,
       }
     },
-    computed: mapGetters(['isUserActive', 'authErrorStatus', 'authErrorMsg']),
+    computed: {
+      ...mapGetters(['activateApiStatus', 'isUserActive', 'authErrorMsg']),
+
+      isActivationApiStatusLoading() {
+        return +this.activateApiStatus === apiStatusList.LOADING;
+      },
+
+      isActivationApiStatusLoaded() {
+        return +this.activateApiStatus === apiStatusList.LOADED;
+      },
+
+      isActivationApiStatusError() {
+        return +this.activateApiStatus === apiStatusList.ERROR;
+      },
+    },
     methods: mapActions(['activate']),
     created() {
       this.loading = true;
@@ -32,12 +53,7 @@
         uid: this.uid,
         token: this.token,
       };
-      this.activate(data)
-        // .then(data => {
-        //   console.log(data);
-        .then(() => {
-          this.loading = false;
-        });
+      this.activate(data);
     },
     watch: {
       $route: 'activate'
