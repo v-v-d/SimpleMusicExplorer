@@ -2,6 +2,7 @@ from django.db import models
 
 # Create your models here.
 
+
 class ProductCategory(models.Model):
     class Meta:
         verbose_name = 'Категория продукта'
