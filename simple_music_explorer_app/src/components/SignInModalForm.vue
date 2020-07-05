@@ -70,7 +70,7 @@
 
     <!-- Error modal -->
     <b-modal
-        v-model="isSignInApiStatusError"
+        v-model="isSignInProcessError"
         title='Sign in error'
         size='sm'
         buttonSize='sm'
@@ -86,8 +86,7 @@
         @cancel="onErrorCancelBtn"
     >
       <p class="my-4">
-        Please retry to sign in. Can't get data from server.
-        Error: {{ authErrorMsg }}
+        Please retry to sign in. Error: {{ authErrorMsg }}
       </p>
     </b-modal>
 
@@ -122,7 +121,17 @@
       },
     },
       computed: {
-      ...mapGetters(['signInApiStatus', 'authErrorMsg', 'showSignInModal']),
+      ...mapGetters([
+        'signInApiStatus', 'authErrorMsg', 'showSignInModal', 'getUserApiStatus'
+      ]),
+
+      isSignInProcessError() {
+        return this.isSignInApiStatusError || this.isUpdateGetUserApiStatusError;
+      },
+
+      isUpdateGetUserApiStatusError() {
+        return +this.getUserApiStatus === apiStatusList.ERROR;
+      },
 
       isSignInApiStatusLoading() {
         return +this.signInApiStatus === apiStatusList.LOADING;

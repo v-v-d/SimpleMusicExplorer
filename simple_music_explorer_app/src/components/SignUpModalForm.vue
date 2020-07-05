@@ -157,8 +157,7 @@
         @cancel="onErrorCancelBtn"
     >
       <p class="my-4">
-        Please retry to sign up. Can't get data from server.
-        Error: {{ authErrorMsg }}
+        Please retry to sign up. Error: {{ authErrorMsg }}
       </p>
     </b-modal>
 
