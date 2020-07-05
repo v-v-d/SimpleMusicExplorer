@@ -21,12 +21,20 @@ export default {
         }
       })
         .then(response => {
-          if (response.status !== 201) {
-            throw Error(`${response.status}: ${response.statusText}`);
+          switch (response.status) {
+            case 201:
+              ctx.commit('updateSignUpApiStatus', apiStatusList.LOADED);
+              ctx.commit('updateShowSignUpModal', false);
+              break;
+            case 400:
+              return response.json();
+            default:
+              throw Error(`${response.status}: ${response.statusText}`);
           }
-
-          ctx.commit('updateSignUpApiStatus', apiStatusList.LOADED);
-          ctx.commit('updateShowSignUpModal', false);
+        })
+        .then(data => {
+          const error = Object.values(data).flat().join(', ');
+          throw Error(error);
         })
         .catch(error => {
           ctx.commit('updateSignUpApiStatus', apiStatusList.ERROR);
@@ -45,11 +53,20 @@ export default {
         }
       })
         .then(response => {
-          if (response.status !== 204) {
-            throw Error(`${response.status}: ${response.statusText}`);
+          switch (response.status) {
+            case 204:
+              ctx.commit('updateActivateApiStatus', apiStatusList.LOADED);
+              break;
+            case 400:
+            case 403:
+              return response.json();
+            default:
+              throw Error(`${response.status}: ${response.statusText}`);
           }
-
-          ctx.commit('updateActivateApiStatus', apiStatusList.LOADED);
+        })
+        .then(data => {
+          const error = Object.values(data).flat().join(', ');
+          throw Error(error);
         })
         .catch(error => {
           ctx.commit('updateActivateApiStatus', apiStatusList.ERROR);
@@ -68,20 +85,27 @@ export default {
         }
       })
         .then(response => {
-          if (!response.ok) {
-            throw Error(`${response.status}: ${response.statusText}`);
+          switch (response.status) {
+            case 200:
+            case 400:
+              return response.json();
+            default:
+              throw Error(`${response.status}: ${response.statusText}`);
           }
-
-          return response.json();
         })
-        .then(tokenObj => {
-          const token = tokenObj['auth_token'];
-          localStorage.setItem('token', `Token ${token}`);
-          ctx.commit('updateSignInApiStatus', apiStatusList.LOADED);
-          ctx.commit('updateShowSignInModal', false);
-          ctx.commit('updateTokenStatus', true);
+        .then(data => {
+          if (!Object.keys(data).includes('auth_token')) {
+            const error = Object.values(data).flat().join(', ');
+            throw Error(error);
+          } else {
+            const token = data['auth_token'];
+            localStorage.setItem('token', `Token ${token}`);
+            ctx.commit('updateSignInApiStatus', apiStatusList.LOADED);
+            ctx.commit('updateShowSignInModal', false);
+            ctx.commit('updateTokenStatus', true);
 
-          ctx.dispatch('getUser');
+            ctx.dispatch('getUser');
+          }
         })
         .catch(error => {
           ctx.commit('updateSignInApiStatus', apiStatusList.ERROR);
@@ -100,15 +124,27 @@ export default {
           },
         })
           .then(response => {
-            if (!response.ok) {
-              throw Error(`${response.status}: ${response.statusText}`);
+            switch (response.status) {
+              case 200:
+              case 401:
+                return response.json();
+              default:
+                throw Error(`${response.status}: ${response.statusText}`);
             }
-
-            return response.json();
           })
-          .then(user => {
-            ctx.commit('updateGetUserApiStatus', apiStatusList.LOADED);
-            ctx.commit('updateUser', user);
+          .then(data => {
+            if (Object.keys(data).includes('detail')) {
+              localStorage.removeItem('token');
+              ctx.commit('updateSignInApiStatus', apiStatusList.INIT);
+              ctx.commit('updateShowSignInModal', true);
+              ctx.commit('updateTokenStatus', false);
+
+              const error = Object.values(data).flat().join(', ');
+              throw Error(error);
+            } else {
+              ctx.commit('updateGetUserApiStatus', apiStatusList.LOADED);
+              ctx.commit('updateUser', data);
+            }
           })
           .catch(error => {
             ctx.commit('updateGetUserApiStatus', apiStatusList.ERROR);
@@ -124,6 +160,13 @@ export default {
       ctx.commit('updateSignOutApiStatus', apiStatusList.LOADING);
 
       if (ctx.getters.isToken) {
+        localStorage.removeItem('token');
+        ctx.commit('updateSignOutApiStatus', apiStatusList.LOADED);
+        ctx.commit('updateShowSignInModal', true);
+        ctx.commit('updateShowSignUpModal', true);
+        ctx.commit('updateTokenStatus', false);
+        ctx.commit('updateUser', {});
+
         fetch('http://127.0.0.1:8000/api/v1/auth/token/logout/', {
           method: 'POST',
           headers: {
@@ -131,18 +174,6 @@ export default {
             'Authorization': localStorage.getItem('token'),
           },
         })
-          .then(response => {
-            if (response.status !== 204) {
-              throw Error(`${response.status}: ${response.statusText}`);
-            }
-
-            localStorage.removeItem('token');
-            ctx.commit('updateSignOutApiStatus', apiStatusList.LOADED);
-            ctx.commit('updateShowSignInModal', true);
-            ctx.commit('updateShowSignUpModal', true);
-            ctx.commit('updateTokenStatus', false);
-            ctx.commit('updateUser', {});
-          })
           .catch(error => {
             ctx.commit('updateSignOutApiStatus', apiStatusList.ERROR);
             ctx.commit('updateAuthErrorMessage', error.message);

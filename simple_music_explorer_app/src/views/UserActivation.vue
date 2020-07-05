@@ -48,7 +48,7 @@
         hide-header-close
     >
       <p class="my-4">
-        Can't get data from server. Error: {{ authErrorMsg }}
+        Error: {{ authErrorMsg }}
       </p>
 
       <!-- Customized modal buttons -->
