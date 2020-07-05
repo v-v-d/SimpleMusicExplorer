@@ -6,7 +6,7 @@ export default {
     getTokenFromLocalStorage(ctx) {
       const token = localStorage.getItem('token');
       if (token) {
-        ctx.commit('updateToken', token);
+        ctx.commit('updateTokenStatus', true);
       }
     },
 
@@ -26,6 +26,7 @@ export default {
           }
 
           ctx.commit('updateSignUpApiStatus', apiStatusList.LOADED);
+          ctx.commit('updateShowSignUpModal', false);
         })
         .catch(error => {
           ctx.commit('updateSignUpApiStatus', apiStatusList.ERROR);
@@ -49,7 +50,6 @@ export default {
           }
 
           ctx.commit('updateActivateApiStatus', apiStatusList.LOADED);
-          ctx.commit('updateUserActiveStatus', true);
         })
         .catch(error => {
           ctx.commit('updateActivateApiStatus', apiStatusList.ERROR);
@@ -78,7 +78,8 @@ export default {
           const token = tokenObj['auth_token'];
           localStorage.setItem('token', `Token ${token}`);
           ctx.commit('updateSignInApiStatus', apiStatusList.LOADED);
-          ctx.commit('updateToken', token);
+          ctx.commit('updateShowSignInModal', false);
+          ctx.commit('updateTokenStatus', true);
 
           ctx.dispatch('getUser');
         })
@@ -95,7 +96,7 @@ export default {
         fetch('http://127.0.0.1:8000/api/v1/auth/users/me/', {
           headers: {
             'Content-type': 'application/json',
-            'Authorization': ctx.getters.token,
+            'Authorization': localStorage.getItem('token'),
           },
         })
           .then(response => {
@@ -127,7 +128,7 @@ export default {
           method: 'POST',
           headers: {
             'Content-type': 'application/json',
-            'Authorization': ctx.getters.token,
+            'Authorization': localStorage.getItem('token'),
           },
         })
           .then(response => {
@@ -137,7 +138,9 @@ export default {
 
             localStorage.removeItem('token');
             ctx.commit('updateSignOutApiStatus', apiStatusList.LOADED);
-            ctx.commit('updateToken', '');
+            ctx.commit('updateShowSignInModal', true);
+            ctx.commit('updateShowSignUpModal', true);
+            ctx.commit('updateTokenStatus', false);
             ctx.commit('updateUser', {});
           })
           .catch(error => {
@@ -171,16 +174,20 @@ export default {
       state.signOutApiStatus = apiStatus;
     },
 
-    updateToken(state, token) {
-      state.token = token;
+    updateShowSignInModal(state, showStatus) {
+      state.showSignInModal = showStatus;
+    },
+
+    updateShowSignUpModal(state, showStatus) {
+      state.showSignUpModal = showStatus;
+    },
+
+    updateTokenStatus(state, tokenStatus) {
+      state.isToken = tokenStatus;
     },
 
     updateUser(state, user) {
       state.user = user;
-    },
-
-    updateUserActiveStatus(state, status) {
-      state.userActiveStatus = status;
     },
 
     updateAuthErrorMessage(state, errorMessage) {
@@ -193,9 +200,12 @@ export default {
     signInApiStatus: apiStatusList.INIT,
     getUserApiStatus: apiStatusList.INIT,
     signOutApiStatus: apiStatusList.INIT,
-    token: '',
+
+    showSignInModal: true,
+    showSignUpModal: true,
+
+    isToken: false,
     user: {},
-    userActiveStatus: false,
     authErrorMessage: '',
   },
   getters: {
@@ -219,20 +229,20 @@ export default {
       return state.signOutApiStatus;
     },
 
-    token(state) {
-      return state.token;
+    showSignInModal(state) {
+      return state.showSignInModal;
+    },
+
+    showSignUpModal(state) {
+      return state.showSignUpModal;
     },
 
     isToken(state) {
-      return Boolean(state.token && typeof state.token !== 'undefined');
+      return state.isToken;
     },
 
     user(state) {
       return state.user;
-    },
-
-    isUserActive(state) {
-      return state.userActiveStatus;
     },
 
     isUser(state) {

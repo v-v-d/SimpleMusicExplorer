@@ -1,6 +1,7 @@
 <template>
   <div>
     <b-modal
+        v-if="show"
         id="modal-sign-up"
         scrollable
         title="Sign Up Form"
@@ -101,31 +102,65 @@
         <b-button @click="cancel()">
           Cancel
         </b-button>
-        <b-button variant="success" @click="ok()">
+
+        <b-button v-if="!isSignUpApiStatusLoading" variant="success" @click="ok()">
           Sign Up
+        </b-button>
+
+        <b-button v-if="isSignUpApiStatusLoading" variant="secondary" disabled>
+          <b-spinner small/>
+          Sign Up...
         </b-button>
       </template>
 
     </b-modal>
 
-    <!-- API status messages -->
-    <div>
-      <div class="d-flex justify-content-center mb-3">
-      <b-spinner
-          v-if="isSignUpApiStatusLoading"
-          variant="primary"
-          label="Loading..."
-      />
-      </div>
+    <!-- Activation message modal -->
+    <b-modal
+        v-model="isSignUpApiStatusLoaded"
+        title='Activate your account'
+        size='sm'
+        centered
+        no-close-on-backdrop
+        no-close-on-esc
+        hide-header-close
+        @ok="onActivateOkBtn"
+    >
+      <p class="my-4">
+        Please check your email.
+      </p>
 
-      <b-alert v-model="isSignUpApiStatusError" variant="danger" dismissible>
-        Can't get data from server. Error: {{ authErrorMsg }}
-      </b-alert>
+      <!-- Customized modal buttons -->
+      <template v-slot:modal-footer="{ ok }">
+      <b-button size="sm" variant="secondary" @click="ok()">
+        Close
+      </b-button>
+    </template>
 
-      <b-alert v-model="isSignUpApiStatusLoaded" variant="success" dismissible>
-        Please check your email for account activation.
-      </b-alert>
-    </div>
+    </b-modal>
+
+    <!-- Error modal -->
+    <b-modal
+        v-model="isSignUpApiStatusError"
+        title='Sign up error'
+        size='sm'
+        buttonSize='sm'
+        okVariant='success'
+        okTitle='Retry'
+        centered
+        no-close-on-backdrop
+        no-close-on-esc
+        body-bg-variant="danger"
+        body-text-variant="white"
+        hide-header-close
+        @ok="onErrorRetryBtn"
+        @cancel="onErrorCancelBtn"
+    >
+      <p class="my-4">
+        Please retry to sign up. Can't get data from server.
+        Error: {{ authErrorMsg }}
+      </p>
+    </b-modal>
 
   </div>
 </template>
@@ -149,6 +184,7 @@
           password: '',
           re_password: '',
         },
+        show: this.showSignUpModal,
       }
     },
     validations: {
@@ -173,8 +209,11 @@
         },
       },
     },
+    mounted() {
+      this.show = true;
+    },
     computed: {
-      ...mapGetters(['signUpApiStatus', 'authErrorMsg']),
+      ...mapGetters(['signUpApiStatus', 'authErrorMsg', 'showSignUpModal']),
 
       isSignUpApiStatusLoading() {
         return +this.signUpApiStatus === apiStatusList.LOADING;
@@ -202,10 +241,6 @@
         if (!this.isFieldsInvalid()) {
           this.signUp(this.form);
         }
-
-        this.$nextTick(() => {
-          this.$bvModal.hide('modal-sign-up')
-        });
       },
 
       isFieldsInvalid() {
@@ -227,6 +262,20 @@
       validateState(key) {
         const { $dirty, $error } = this.$v.form[key];
         return $dirty ? !$error : null;
+      },
+
+      onActivateOkBtn() {
+        this.resetFormValues();
+        this.$store.commit('updateSignUnApiStatus', apiStatusList.INIT);
+      },
+
+      onErrorRetryBtn() {
+        this.resetFormValues();
+        this.$store.commit('updateSignUnApiStatus', apiStatusList.INIT);
+      },
+
+      onErrorCancelBtn() {
+        this.$bvModal.hide('modal-sign-up');
       },
     },
   }
