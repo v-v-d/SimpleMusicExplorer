@@ -7,7 +7,7 @@ class User(AbstractUser):
     email = models.EmailField(blank=False, unique=True)
     is_artist = models.BooleanField(default=False)
 
-    REQUIRED_FIELDS = ['email', 'is_artist']
+    REQUIRED_FIELDS = ['email']
 
     def __str__(self):
         return self.username
