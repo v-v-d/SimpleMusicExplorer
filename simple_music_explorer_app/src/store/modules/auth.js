@@ -113,49 +113,6 @@ export default {
         });
     },
 
-    getUser(ctx) {
-      if (ctx.getters.isToken) {
-        ctx.commit('updateGetUserApiStatus', apiStatusList.LOADING);
-
-        fetch('http://127.0.0.1:8000/api/v1/auth/users/me/', {
-          headers: {
-            'Content-type': 'application/json',
-            'Authorization': localStorage.getItem('token'),
-          },
-        })
-          .then(response => {
-            switch (response.status) {
-              case 200:
-              case 401:
-                return response.json();
-              default:
-                throw Error(`${response.status}: ${response.statusText}`);
-            }
-          })
-          .then(data => {
-            if (Object.keys(data).includes('detail')) {
-              localStorage.removeItem('token');
-              ctx.commit('updateSignInApiStatus', apiStatusList.INIT);
-              ctx.commit('updateShowSignInModal', true);
-              ctx.commit('updateTokenStatus', false);
-
-              const error = Object.values(data).flat().join(', ');
-              throw Error(error);
-            } else {
-              ctx.commit('updateGetUserApiStatus', apiStatusList.LOADED);
-              ctx.commit('updateUser', data);
-            }
-          })
-          .catch(error => {
-            ctx.commit('updateGetUserApiStatus', apiStatusList.ERROR);
-            ctx.commit('updateAuthErrorMessage', error.message);
-          })
-      } else {
-        ctx.commit('updateGetUserApiStatus', apiStatusList.ERROR);
-        ctx.commit('updateAuthErrorMessage', 'Token is not exists.');
-      }
-    },
-
     signOut(ctx) {
       ctx.commit('updateSignOutApiStatus', apiStatusList.LOADING);
 
@@ -197,10 +154,6 @@ export default {
       state.signInApiStatus = apiStatus;
     },
 
-    updateGetUserApiStatus(state, apiStatus) {
-      state.getUserApiStatus = apiStatus;
-    },
-
     updateSignOutApiStatus(state, apiStatus) {
       state.signOutApiStatus = apiStatus;
     },
@@ -217,10 +170,6 @@ export default {
       state.isToken = tokenStatus;
     },
 
-    updateUser(state, user) {
-      state.user = user;
-    },
-
     updateAuthErrorMessage(state, errorMessage) {
       state.authErrorMessage = errorMessage;
     },
@@ -229,14 +178,12 @@ export default {
     signUpApiStatus: apiStatusList.INIT,
     activateApiStatus: apiStatusList.INIT,
     signInApiStatus: apiStatusList.INIT,
-    getUserApiStatus: apiStatusList.INIT,
     signOutApiStatus: apiStatusList.INIT,
 
     showSignInModal: true,
     showSignUpModal: true,
 
     isToken: false,
-    user: {},
     authErrorMessage: '',
   },
   getters: {
@@ -250,10 +197,6 @@ export default {
 
     signInApiStatus(state) {
       return state.signInApiStatus;
-    },
-
-    getUserApiStatus(state) {
-      return state.getUserApiStatus;
     },
 
     signOutApiStatus(state) {
@@ -270,14 +213,6 @@ export default {
 
     isToken(state) {
       return state.isToken;
-    },
-
-    user(state) {
-      return state.user;
-    },
-
-    isUser(state) {
-      return Boolean(Object.keys(state.user).length);
     },
 
     authErrorMsg(state) {
