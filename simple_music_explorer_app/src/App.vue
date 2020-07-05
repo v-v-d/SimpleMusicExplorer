@@ -23,12 +23,12 @@
       Footer,
     },
     computed: mapGetters(['isToken']),
-    methods: mapActions(['getTokenFromLocalStorage']),
+    methods: mapActions(['getTokenFromLocalStorage', 'getUser']),
     mounted() {
       this.getTokenFromLocalStorage();
 
       if (this.isToken) {
-        console.log('token is loaded.')
+        this.getUser();
       }
     }
   }

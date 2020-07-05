@@ -38,6 +38,7 @@
             <b-dropdown-item v-if="!isToken" v-b-modal.modal-sign-in>Sign In</b-dropdown-item>
 
             <b-dropdown-item :to="{ name: 'account' }" v-if="isToken">Account</b-dropdown-item>
+            <b-dropdown-item v-if="isToken" v-b-modal.modal-patch-user>Update user</b-dropdown-item>
 
             <b-dropdown-item v-if="isToken" @click="signOut">Sign Out</b-dropdown-item>
           </b-nav-item-dropdown>
@@ -47,12 +48,14 @@
 
     <SignInModalForm/>
     <SignUpModalForm/>
+    <PatchUserModalForm/>
   </div>
 </template>
 
 <script>
-  import SignInModalForm from './SignInModalForm.vue'
-  import SignUpModalForm from './SignUpModalForm.vue'
+  import SignInModalForm from '@/components/SignInModalForm.vue';
+  import SignUpModalForm from '@/components/SignUpModalForm.vue';
+  import PatchUserModalForm from '@/components/PatchUserModalForm.vue';
   import { mapGetters, mapActions } from 'vuex';
 
   export default {
@@ -60,6 +63,7 @@
     components: {
       SignInModalForm,
       SignUpModalForm,
+      PatchUserModalForm,
     },
     computed: mapGetters(['isToken']),
     methods: mapActions(['signOut']),

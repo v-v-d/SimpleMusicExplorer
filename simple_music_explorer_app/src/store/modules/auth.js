@@ -74,6 +74,10 @@ export default {
         });
     },
 
+    resendActivation(ctx) {
+      console.log(ctx)
+    },
+
     signIn(ctx, data) {
       ctx.commit('updateSignInApiStatus', apiStatusList.LOADING);
 
@@ -117,13 +121,6 @@ export default {
       ctx.commit('updateSignOutApiStatus', apiStatusList.LOADING);
 
       if (ctx.getters.isToken) {
-        localStorage.removeItem('token');
-        ctx.commit('updateSignOutApiStatus', apiStatusList.LOADED);
-        ctx.commit('updateShowSignInModal', true);
-        ctx.commit('updateShowSignUpModal', true);
-        ctx.commit('updateTokenStatus', false);
-        ctx.commit('updateUser', {});
-
         fetch('http://127.0.0.1:8000/api/v1/auth/token/logout/', {
           method: 'POST',
           headers: {
@@ -131,6 +128,18 @@ export default {
             'Authorization': localStorage.getItem('token'),
           },
         })
+          .then(response => {
+            if (response.status === 204) {
+              localStorage.removeItem('token');
+              ctx.commit('updateSignOutApiStatus', apiStatusList.LOADED);
+              ctx.commit('updateShowSignInModal', true);
+              ctx.commit('updateShowSignUpModal', true);
+              ctx.commit('updateTokenStatus', false);
+              ctx.commit('updateUser', {});
+            } else {
+              throw Error(`${response.status}: ${response.statusText}`);
+            }
+          })
           .catch(error => {
             ctx.commit('updateSignOutApiStatus', apiStatusList.ERROR);
             ctx.commit('updateAuthErrorMessage', error.message);
