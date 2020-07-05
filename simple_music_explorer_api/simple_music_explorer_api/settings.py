@@ -38,9 +38,10 @@ ALLOWED_HOSTS = []
 
 
 if DEBUG:
-    # EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
     EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
     EMAIL_FILE_PATH = os.path.join(BASE_DIR, 'tmp', 'emails')
+
+    DOMAIN = 'localhost:8080'
 
 # Application definition
 
@@ -51,6 +52,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
+    'corsheaders',
 
     'rest_framework',
     'rest_framework.authtoken',
@@ -64,6 +67,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -191,7 +195,7 @@ SIMPLE_JWT = {
 DJOSER = {
     'PASSWORD_RESET_CONFIRM_URL': '#/password/reset/confirm/{uid}/{token}',
     'USERNAME_RESET_CONFIRM_URL': '#/username/reset/confirm/{uid}/{token}',
-    'ACTIVATION_URL': '#/activate/{uid}/{token}',
+    'ACTIVATION_URL': 'activate/{uid}/{token}',
     'SEND_ACTIVATION_EMAIL': True,  # Подтверждение регистрации по почте
     'USER_CREATE_PASSWORD_RETYPE': True,
     'SERIALIZERS': {
@@ -200,3 +204,8 @@ DJOSER = {
         # 'user_update': 'authapp.serializers.UserUpdateSerializer',
     },
 }
+
+CORS_ORIGIN_WHITELIST = (
+    'http://127.0.0.1:8080',
+    'http://localhost:8080',
+)
