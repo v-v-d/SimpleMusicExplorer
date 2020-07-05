@@ -1,43 +1,96 @@
 <template>
   <div>
-    <b-spinner v-if="loading" variant="primary" label="Spinning"></b-spinner>
+    <div class="d-flex justify-content-center mb-3">
+      <b-spinner
+          v-if="isActivationApiStatusLoading"
+          variant="primary"
+          label="Loading..."
+      />
+    </div>
 
-    <b-alert v-model="authErrorStatus" variant="danger">
-      Can't get data from server. Error: {{ authErrorMsg }}
-    </b-alert>
+    <!-- Activation message modal -->
+    <b-modal
+        v-model="isActivationApiStatusLoaded"
+        title='Success'
+        size='sm'
+        centered
+        no-close-on-backdrop
+        no-close-on-esc
+        hide-header-close
+    >
+      <p class="my-4">
+        Account activation succeeded! Now sign in please.
+      </p>
 
-    <b-alert v-model="isUserActive" variant="success">
-      Account activation succeeded! Now sign in please.
-    </b-alert>
+      <!-- Customized modal buttons -->
+      <template v-slot:modal-footer="{ cancel, ok }">
+        <b-button variant="secondary" @click="cancel()">
+          Cancel
+        </b-button>
+
+        <b-button v-b-modal.modal-sign-in variant="success" @click="ok()">
+          Sign In
+        </b-button>
+      </template>
+
+    </b-modal>
+
+    <!-- Error modal -->
+    <b-modal
+        v-model="isActivationApiStatusError"
+        title='Account activation error'
+        size='sm'
+        centered
+        no-close-on-backdrop
+        no-close-on-esc
+        body-bg-variant="danger"
+        body-text-variant="white"
+        hide-header-close
+    >
+      <p class="my-4">
+        Can't get data from server. Error: {{ authErrorMsg }}
+      </p>
+
+      <!-- Customized modal buttons -->
+      <template v-slot:modal-footer="{ ok }">
+        <b-button size="sm" variant="secondary" @click="ok()">
+          Close
+        </b-button>
+      </template>
+    </b-modal>
+
   </div>
 </template>
 
 <script>
   import { mapGetters, mapActions } from 'vuex';
+  import apiStatusList from "@/store/apiStatusList";
 
   export default {
     name: "UserActivation",
     props: ['uid', 'token'],
-    data() {
-      return {
-        loading: false,
-      }
+    computed: {
+      ...mapGetters(['activateApiStatus', 'authErrorMsg']),
+
+      isActivationApiStatusLoading() {
+        return +this.activateApiStatus === apiStatusList.LOADING;
+      },
+
+      isActivationApiStatusLoaded() {
+        return +this.activateApiStatus === apiStatusList.LOADED;
+      },
+
+      isActivationApiStatusError() {
+        return +this.activateApiStatus === apiStatusList.ERROR;
+      },
     },
-    computed: mapGetters(['isUserActive', 'authErrorStatus', 'authErrorMsg']),
     methods: mapActions(['activate']),
     created() {
-      this.loading = true;
-
       const data = {
         uid: this.uid,
         token: this.token,
       };
-      this.activate(data)
-        // .then(data => {
-        //   console.log(data);
-        .then(() => {
-          this.loading = false;
-        });
+      this.activate(data);
     },
     watch: {
       $route: 'activate'

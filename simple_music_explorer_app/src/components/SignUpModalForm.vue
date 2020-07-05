@@ -1,12 +1,17 @@
 <template>
   <div>
     <b-modal
+        v-if="show"
         id="modal-sign-up"
         scrollable
         title="Sign Up Form"
-        @hidden="onHidden"
+        @hidden="resetFormValues"
+        @cancel="resetFormValues"
+        @ok="onOk"
     >
-      <b-form @submit.stop.prevent="onSubmit" @reset.stop.prevent="onReset" v-if="show">
+      <b-form @submit.stop.prevent="handleSubmit">
+
+        <!-- Username input -->
         <b-form-group
             id="input-group-1"
             label="Username:"
@@ -29,6 +34,7 @@
 
         </b-form-group>
 
+        <!-- Email input -->
         <b-form-group
             id="input-group-2"
             label="Email:"
@@ -51,6 +57,7 @@
           </b-form-invalid-feedback>
         </b-form-group>
 
+        <!-- Password input -->
         <b-form-group
             id="input-group-3"
             label="Password:"
@@ -66,6 +73,7 @@
           ></b-form-input>
         </b-form-group>
 
+        <!-- Re_password input -->
         <b-form-group
             id="input-group-4"
             label="Repeat password:"
@@ -73,8 +81,8 @@
         >
           <b-form-input
               id="input-4"
-              v-model="$v.form.password2.$model"
-              :state="validateState('password2')"
+              v-model="$v.form.re_password.$model"
+              :state="validateState('re_password')"
               aria-describedby="input-live-feedback"
               type="password"
               placeholder="Enter password one more time"
@@ -86,30 +94,74 @@
           </b-form-invalid-feedback>
         </b-form-group>
 
-        <b-button type="submit" variant="primary">Submit</b-button>
-        <b-button type="reset" variant="danger">Reset</b-button>
       </b-form>
 
-      <h5 v-if="!show && authErrorStatus">
-        Sending activation email failed. Try to sign up again.
-      </h5>
-
-      <h5 v-if="!show && !authErrorStatus" class="msg">Please check your email.</h5>
-      <div v-if="!show" class="w-100">
-        <b-button
-          variant="secondary"
-          class="float-right"
-          @click="onClose"
-        >
-          Close
+      <!-- Customized modal buttons -->
+      <template v-slot:modal-footer="{ ok, cancel }">
+        <!-- Emulate built in modal footer ok and cancel button actions -->
+        <b-button @click="cancel()">
+          Cancel
         </b-button>
-      </div>
 
-      <template v-slot:modal-footer>
-        <p> </p>
+        <b-button v-if="!isSignUpApiStatusLoading" variant="success" @click="ok()">
+          Sign Up
+        </b-button>
+
+        <b-button v-if="isSignUpApiStatusLoading" variant="secondary" disabled>
+          <b-spinner small/>
+          Sign Up...
+        </b-button>
       </template>
 
     </b-modal>
+
+    <!-- Activation message modal -->
+    <b-modal
+        v-model="isSignUpApiStatusLoaded"
+        title='Activate your account'
+        size='sm'
+        centered
+        no-close-on-backdrop
+        no-close-on-esc
+        hide-header-close
+        @ok="onActivateOkBtn"
+    >
+      <p class="my-4">
+        Please check your email.
+      </p>
+
+      <!-- Customized modal buttons -->
+      <template v-slot:modal-footer="{ ok }">
+      <b-button size="sm" variant="secondary" @click="ok()">
+        Close
+      </b-button>
+    </template>
+
+    </b-modal>
+
+    <!-- Error modal -->
+    <b-modal
+        v-model="isSignUpApiStatusError"
+        title='Sign up error'
+        size='sm'
+        buttonSize='sm'
+        okVariant='success'
+        okTitle='Retry'
+        centered
+        no-close-on-backdrop
+        no-close-on-esc
+        body-bg-variant="danger"
+        body-text-variant="white"
+        hide-header-close
+        @ok="onErrorRetryBtn"
+        @cancel="onErrorCancelBtn"
+    >
+      <p class="my-4">
+        Please retry to sign up. Can't get data from server.
+        Error: {{ authErrorMsg }}
+      </p>
+    </b-modal>
+
   </div>
 </template>
 
@@ -119,6 +171,7 @@
     required, minLength, maxLength, email, sameAs, alphaNum
   } from "vuelidate/lib/validators";
   import { mapGetters, mapActions } from 'vuex';
+  import apiStatusList from "@/store/apiStatusList";
 
   export default {
     name: "SignUpModalForm",
@@ -129,9 +182,9 @@
           username: '',
           email: '',
           password: '',
-          password2: '',
+          re_password: '',
         },
-        show: true,
+        show: this.showSignUpModal,
       }
     },
     validations: {
@@ -150,72 +203,84 @@
           maxLength: maxLength(20),
           alphaNum,
         },
-        password2: {
+        re_password: {
           required,
           sameAsPassword: sameAs('password'),
         },
       },
     },
-    computed: mapGetters(['authErrorStatus']),
-    methods: {
-      ...mapActions(['getToken']),
+    mounted() {
+      this.show = true;
+    },
+    computed: {
+      ...mapGetters(['signUpApiStatus', 'authErrorMsg', 'showSignUpModal']),
 
-      onSubmit() {
-        if (this.isFieldsValid()) {
-          const payload = {
-            data: this.form,
-            url: '/api/auth/register/',
-          }
-          this.getToken(payload);
-          this.show = false;
+      isSignUpApiStatusLoading() {
+        return +this.signUpApiStatus === apiStatusList.LOADING;
+      },
+
+      isSignUpApiStatusLoaded() {
+        return +this.signUpApiStatus === apiStatusList.LOADED;
+      },
+
+      isSignUpApiStatusError() {
+        return +this.signUpApiStatus === apiStatusList.ERROR;
+      },
+    },
+    methods: {
+      ...mapActions(['signUp']),
+
+      onOk(bvModalEvt) {
+        bvModalEvt.preventDefault();
+        this.handleSubmit();
+      },
+
+      handleSubmit() {
+        this.$v.$touch();
+
+        if (!this.isFieldsInvalid()) {
+          this.signUp(this.form);
         }
       },
 
-      isFieldsValid() {
-        return Object.keys(this.form).some(key => !this.$v.form[key].$invalid)
+      isFieldsInvalid() {
+        return Object.keys(this.form).some(key => this.$v.form[key].$invalid)
       },
 
-      onReset() {
-        this.resetFormValues();
-      },
-      
       resetFormValues() {
         Object.keys(this.form).forEach(key => {
           if (this.form[key]) {
-            this.form[key] = ''
+            this.form[key] = '';
           }
+
+          this.$nextTick(() => {
+            this.$v.$reset();
+          });
         });
-
-        this.$nextTick(() => {
-          this.$v.$reset();
-        });
-      },
-
-      onHidden() {
-        this.resetFormValues();
-        this.show = true;
-      },
-
-      onClose() {
-        this.resetFormValues();
-        this.$bvModal.hide('modal-sign-up');
-        this.show = true;
       },
 
       validateState(key) {
         const { $dirty, $error } = this.$v.form[key];
         return $dirty ? !$error : null;
       },
+
+      onActivateOkBtn() {
+        this.resetFormValues();
+        this.$store.commit('updateSignUnApiStatus', apiStatusList.INIT);
+      },
+
+      onErrorRetryBtn() {
+        this.resetFormValues();
+        this.$store.commit('updateSignUnApiStatus', apiStatusList.INIT);
+      },
+
+      onErrorCancelBtn() {
+        this.$bvModal.hide('modal-sign-up');
+      },
     },
   }
 </script>
 
 <style scoped>
-  .btn {
-    margin-right: 10px !important;
-  }
 
-  .msg {
-    text-align: center;
-  }
 </style>

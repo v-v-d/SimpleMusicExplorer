@@ -1,12 +1,19 @@
 <template>
   <div>
+    <!-- Main sign in modal -->
     <b-modal
+        v-if="showSignInModal"
         id="modal-sign-in"
         scrollable
         title="Sign In Form"
+        @show="resetFormValues"
         @hidden="resetFormValues"
+        @cancel="resetFormValues"
+        @ok="onOk"
     >
-      <b-form @submit.stop.prevent="onSubmit" @reset.stop.prevent="onReset" v-if="show">
+      <b-form @submit.stop.prevent="handleSubmit">
+
+        <!-- Username input -->
         <b-form-group
             id="input-group-1"
             label="Username:"
@@ -23,18 +30,18 @@
 
           <!-- This will only be shown if the preceding input has an invalid state -->
           <b-form-invalid-feedback id="input-live-feedback">
-            This is a required field and must be at least
-            {{ $v.form.username.$params.minLength.min }} characters.
+            This filed is a required.
           </b-form-invalid-feedback>
         </b-form-group>
 
+        <!-- Password input -->
         <b-form-group
-            id="input-group-3"
+            id="input-group-2"
             label="Password:"
-            label-for="input-3"
+            label-for="input-2"
         >
           <b-form-input
-              id="input-3"
+              id="input-2"
               v-model="$v.form.password.$model"
               :state="validateState('password')"
               type="password"
@@ -42,22 +49,56 @@
           ></b-form-input>
         </b-form-group>
 
-        <b-button type="submit" variant="primary">Submit</b-button>
-        <b-button type="reset" variant="danger">Reset</b-button>
       </b-form>
 
-      <template v-slot:modal-footer>
-        <p> </p>
-      </template>
+      <!-- Customized modal buttons -->
+      <template v-slot:modal-footer="{ ok, cancel }">
+        <b-button @click="cancel()">
+          Cancel
+        </b-button>
 
+        <b-button v-if="!isSignInApiStatusLoading" variant="success" @click="ok()">
+          Sign In
+        </b-button>
+
+        <b-button v-if="isSignInApiStatusLoading" variant="secondary" disabled>
+          <b-spinner small/>
+          Sign In...
+        </b-button>
+      </template>
     </b-modal>
+
+    <!-- Error modal -->
+    <b-modal
+        v-model="isSignInApiStatusError"
+        title='Sign in error'
+        size='sm'
+        buttonSize='sm'
+        okVariant='success'
+        okTitle='Retry'
+        centered
+        no-close-on-backdrop
+        no-close-on-esc
+        body-bg-variant="danger"
+        body-text-variant="white"
+        hide-header-close
+        @ok="onErrorRetryBtn"
+        @cancel="onErrorCancelBtn"
+    >
+      <p class="my-4">
+        Please retry to sign in. Can't get data from server.
+        Error: {{ authErrorMsg }}
+      </p>
+    </b-modal>
+
   </div>
 </template>
 
 <script>
   import { validationMixin } from "vuelidate";
-  import { required, minLength } from "vuelidate/lib/validators";
-  import { mapActions } from 'vuex';
+  import { required } from "vuelidate/lib/validators";
+  import { mapGetters, mapActions } from 'vuex';
+  import apiStatusList from "@/store/apiStatusList";
 
   export default {
     name: "SignInModalForm",
@@ -68,55 +109,63 @@
           username: '',
           password: '',
         },
-        show: true,
       }
     },
     validations: {
       form: {
         username: {
           required,
-          minLength: minLength(3),
         },
         password: {
           required,
         },
       },
     },
+      computed: {
+      ...mapGetters(['signInApiStatus', 'authErrorMsg', 'showSignInModal']),
+
+      isSignInApiStatusLoading() {
+        return +this.signInApiStatus === apiStatusList.LOADING;
+      },
+
+      isSignInApiStatusError: {
+        get() {
+          return +this.signInApiStatus === apiStatusList.ERROR;
+        },
+        set() {
+          this.$store.commit('updateSignInApiStatus', apiStatusList.INIT);
+        },
+      },
+    },
     methods: {
-      ...mapActions(['getToken']),
+      ...mapActions(['signIn']),
 
-      onSubmit() {
-        if (this.isFieldsValid()) {
-          const payload = {
-            data: this.form,
-            url: '/api/auth/login/',
-          }
-          this.getToken(payload);
-          this.closeModal();
+      onOk(bvModalEvt) {
+        bvModalEvt.preventDefault();
+        this.handleSubmit();
+      },
+
+      handleSubmit() {
+        this.$v.$touch();
+
+        if (!this.isFieldsInvalid()) {
+          this.signIn(this.form);
         }
       },
 
-      isFieldsValid() {
-        return Object.keys(this.form).some(key => !this.$v.form[key].$invalid)
-      },
-
-      closeModal() {
-        if (Object.values(this.form).every(value => value)) {
-          this.resetFormValues();
-          this.$bvModal.hide('modal-sign-in');
-        }
-      },
-
-      onReset() {
-        this.resetFormValues();
+      isFieldsInvalid() {
+        return Object.keys(this.form).some(key => this.$v.form[key].$invalid)
       },
 
       resetFormValues() {
         Object.keys(this.form).forEach(key => {
-          this.form[key] = null;
-        });
-        this.$nextTick(() => {
-          this.$v.$reset();
+          if (this.form[key]) {
+            this.form[key] = '';
+          }
+
+          this.$nextTick(() => {
+            this.$v.$reset();
+          });
         });
       },
 
@@ -124,12 +173,21 @@
         const { $dirty, $error } = this.$v.form[key];
         return $dirty ? !$error : null;
       },
+
+      onErrorRetryBtn() {
+        this.resetFormValues();
+        this.$store.commit('updateSignInApiStatus', apiStatusList.INIT);
+        this.$bvModal.hide('modal-sign-in-error');
+      },
+
+      onErrorCancelBtn() {
+        this.$bvModal.hide('modal-sign-in-error');
+        this.$bvModal.hide('modal-sign-in');
+      },
     },
   }
 </script>
 
 <style scoped>
-  .btn {
-    margin-right: 10px !important;
-  }
+
 </style>
