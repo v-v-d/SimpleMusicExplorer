@@ -40,12 +40,15 @@
 
 <!--            <b-dropdown-item :to="{ name: 'account' }" v-if="isToken">Account</b-dropdown-item>-->
             <b-dropdown-item v-if="isToken" @click="showPatchUserModal">Update user</b-dropdown-item>
+            <b-dropdown-item v-if="isToken" @click="showDeleteUserModal">Delete user</b-dropdown-item>
 
             <b-dropdown-item v-if="isToken" @click="signOut">Sign Out</b-dropdown-item>
 
             <SignInModalForm/>
             <SignUpModalForm/>
             <PatchUserModalForm/>
+            <DeleteUserModalForm/>
+
           </b-nav-item-dropdown>
         </b-navbar-nav>
       </b-collapse>
@@ -57,6 +60,7 @@
   import SignInModalForm from '@/components/SignInModalForm.vue';
   import SignUpModalForm from '@/components/SignUpModalForm.vue';
   import PatchUserModalForm from '@/components/PatchUserModalForm.vue';
+  import DeleteUserModalForm from '@/components/DeleteUserModalForm.vue';
   import { mapGetters, mapActions } from 'vuex';
 
   export default {
@@ -65,21 +69,43 @@
       SignInModalForm,
       SignUpModalForm,
       PatchUserModalForm,
+      DeleteUserModalForm,
     },
     computed: mapGetters(['isToken']),
     methods: {
-      ...mapActions(['signOut']),
+      ...mapActions(['signOut', 'deleteUser']),
 
       showSignUpModal() {
         this.$bvModal.show('modal-sign-up');
       },
 
       showSignInModal() {
+        console.log('show sign in modal')
         this.$bvModal.show('modal-sign-in');
       },
 
       showPatchUserModal() {
         this.$bvModal.show('modal-patch-user');
+      },
+
+      showDeleteUserModal() {
+        const msg = 'Please confirm that you want to permanently delete your account.'
+        this.$bvModal.msgBoxConfirm(msg, {
+          title: 'Please Confirm',
+          size: 'sm',
+          buttonSize: 'sm',
+          okVariant: 'danger',
+          okTitle: 'DELETE',
+          cancelTitle: 'CANCEL',
+          footerClass: 'p-2',
+          hideHeaderClose: false,
+          centered: true
+        })
+          .then(result => {
+            if (result) {
+              this.$bvModal.show('modal-delete-user');
+            }
+          })
       },
     },
   }

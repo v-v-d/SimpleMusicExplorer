@@ -68,7 +68,13 @@ export default {
             }
           })
           .then(data => {
-            console.log(data);
+            if (Object.values(data).some(value => Array.isArray(value))) {
+              const error = Object.values(data).flat().join(', ');
+              throw Error(error);
+            } else {
+              ctx.commit('updatePatchUserApiStatus', apiStatusList.LOADED);
+
+            }
           })
           .catch(error => {
             ctx.commit('updatePatchUserApiStatus', apiStatusList.ERROR);
@@ -80,8 +86,46 @@ export default {
       }
     },
 
-    deleteUser(ctx) {
-      console.log(ctx)
+    deleteUser(ctx, data) {
+      if (ctx.getters.isToken) {
+        ctx.commit('updateDeleteUserApiStatus', apiStatusList.LOADING);
+
+        fetch(`${ctx.getters.apiAuth}/users/me/`, {
+          method: 'DELETE',
+          body: JSON.stringify(data),
+          headers: {
+            'Content-type': 'application/json',
+            'Authorization': localStorage.getItem('token'),
+          },
+        })
+          .then(response => {
+            switch (response.status) {
+              case 204:
+                ctx.commit('updateDeleteUserApiStatus', apiStatusList.LOADED);
+                localStorage.removeItem('token');
+                ctx.commit('updateTokenStatus', false);
+                ctx.commit('updateUser', {});
+                break;
+              case 400:
+                return response.json();
+              default:
+                throw Error(`${response.status}: ${response.statusText}`);
+            }
+          })
+          .then(data => {
+            if (data) {
+              const error = Object.values(data).flat().join(', ');
+              throw Error(error);
+            }
+          })
+          .catch(error => {
+            ctx.commit('updateDeleteUserApiStatus', apiStatusList.ERROR);
+            ctx.commit('updateUserErrorMessage', error.message);
+          })
+      } else {
+        ctx.commit('updateDeleteUserApiStatus', apiStatusList.ERROR);
+        ctx.commit('updateAuthErrorMessage', 'Token is not exists.');
+      }
     },
 
     resetUsername(ctx) {
