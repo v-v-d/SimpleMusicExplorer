@@ -46,6 +46,7 @@
         body-bg-variant="danger"
         body-text-variant="white"
         hide-header-close
+        @ok="redirect"
     >
       <p class="my-4">
         Error: {{ authErrorMsg }}
@@ -65,6 +66,7 @@
 <script>
   import { mapGetters, mapActions } from 'vuex';
   import apiStatusList from "@/store/apiStatusList";
+  import router from "@/router";
 
   export default {
     name: "UserActivation",
@@ -84,7 +86,13 @@
         return +this.activateApiStatus === apiStatusList.ERROR;
       },
     },
-    methods: mapActions(['activate']),
+    methods: {
+      ...mapActions(['activate']),
+
+      redirect() {
+        router.push({ name: 'Index' });
+      },
+    },
     created() {
       const data = {
         uid: this.uid,

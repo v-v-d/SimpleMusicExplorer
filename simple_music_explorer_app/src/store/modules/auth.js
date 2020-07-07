@@ -1,5 +1,6 @@
 'use strict';
 import apiStatusList from "@/store/apiStatusList";
+import router from "@/router";
 
 export default {
   actions: {
@@ -58,6 +59,7 @@ export default {
           switch (response.status) {
             case 204:
               ctx.commit('updateActivateApiStatus', apiStatusList.LOADED);
+              router.push({ name: 'Index' });
               break;
             case 400:
             case 403:
@@ -67,8 +69,10 @@ export default {
           }
         })
         .then(data => {
-          const error = Object.values(data).flat().join(', ');
-          throw Error(error);
+          if (data) {
+            const error = Object.values(data).flat().join(', ');
+            throw Error(error);
+          }
         })
         .catch(error => {
           ctx.commit('updateActivateApiStatus', apiStatusList.ERROR);
