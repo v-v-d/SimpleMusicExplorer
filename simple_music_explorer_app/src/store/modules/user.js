@@ -7,7 +7,7 @@ export default {
       if (ctx.getters.isToken) {
         ctx.commit('updateGetUserApiStatus', apiStatusList.LOADING);
 
-        fetch('http://127.0.0.1:8000/api/v1/auth/users/me/', {
+        fetch(`${ctx.getters.apiAuth}/users/me/`, {
           headers: {
             'Content-type': 'application/json',
             'Authorization': localStorage.getItem('token'),
@@ -50,7 +50,7 @@ export default {
       if (ctx.getters.isToken) {
         ctx.commit('updatePatchUserApiStatus', apiStatusList.LOADING);
 
-        fetch('http://127.0.0.1:8000/api/v1/auth/users/me/', {
+        fetch(`${ctx.getters.apiAuth}/users/me/`, {
           method: 'PATCH',
           body: JSON.stringify(data),
           headers: {

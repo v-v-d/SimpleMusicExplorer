@@ -13,7 +13,7 @@ export default {
     signUp(ctx, data) {
       ctx.commit('updateSignUpApiStatus', apiStatusList.LOADING);
 
-      fetch('http://127.0.0.1:8000/api/v1/auth/users/', {
+      fetch(`${ctx.getters.apiAuth}/users/`, {
         method: 'POST',
         body: JSON.stringify(data),
         headers: {
@@ -47,7 +47,7 @@ export default {
     activate(ctx, data) {
       ctx.commit('updateActivateApiStatus', apiStatusList.LOADING);
 
-      fetch('http://127.0.0.1:8000/api/v1/auth/users/activation/', {
+      fetch(`${ctx.getters.apiAuth}/users/activation/`, {
         method: 'POST',
         body: JSON.stringify(data),
         headers: {
@@ -83,7 +83,7 @@ export default {
     signIn(ctx, data) {
       ctx.commit('updateSignInApiStatus', apiStatusList.LOADING);
 
-      fetch('http://127.0.0.1:8000/api/v1/auth/token/login/', {
+      fetch(`${ctx.getters.apiAuth}/token/login/`, {
         method: 'POST',
         body: JSON.stringify(data),
         headers: {
@@ -123,7 +123,7 @@ export default {
       ctx.commit('updateSignOutApiStatus', apiStatusList.LOADING);
 
       if (ctx.getters.isToken) {
-        fetch('http://127.0.0.1:8000/api/v1/auth/token/logout/', {
+        fetch(`${ctx.getters.apiAuth}/token/logout/`, {
           method: 'POST',
           headers: {
             'Content-type': 'application/json',
