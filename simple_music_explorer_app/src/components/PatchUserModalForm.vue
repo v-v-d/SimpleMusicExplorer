@@ -57,6 +57,7 @@
     <!-- Error modal -->
     <b-modal
         v-model="isPatchUserApiStatusError"
+        id="modal-patch-user-error"
         title='Change user info error'
         size='sm'
         buttonSize='sm'
@@ -72,7 +73,7 @@
         @cancel="onErrorCancelBtn"
     >
       <p class="my-4">
-        Please retry to sign up. Error: {{ userErrorMsg }}
+        Error: {{ userErrorMsg }}
       </p>
     </b-modal>
 

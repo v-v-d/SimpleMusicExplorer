@@ -33,8 +33,10 @@ export default {
           }
         })
         .then(data => {
-          const error = Object.values(data).flat().join(', ');
-          throw Error(error);
+          if (data) {
+            const error = Object.values(data).flat().join(', ');
+            throw Error(error);
+          }
         })
         .catch(error => {
           ctx.commit('updateSignUpApiStatus', apiStatusList.ERROR);

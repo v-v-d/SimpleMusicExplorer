@@ -1,10 +1,12 @@
 <template>
   <div>
+    <!-- Main sign up modal -->
     <b-modal
-        v-if="show"
+        v-if="showSignUpModal"
         id="modal-sign-up"
         scrollable
         title="Sign Up Form"
+        @show="resetFormValues"
         @hidden="resetFormValues"
         @cancel="resetFormValues"
         @ok="onOk"
@@ -31,7 +33,6 @@
             This is a required field and must be at least
             {{ $v.form.username.$params.minLength.min }} characters.
           </b-form-invalid-feedback>
-
         </b-form-group>
 
         <!-- Email input -->
@@ -98,7 +99,6 @@
 
       <!-- Customized modal buttons -->
       <template v-slot:modal-footer="{ ok, cancel }">
-        <!-- Emulate built in modal footer ok and cancel button actions -->
         <b-button @click="cancel()">
           Cancel
         </b-button>
@@ -118,6 +118,7 @@
     <!-- Activation message modal -->
     <b-modal
         v-model="isSignUpApiStatusLoaded"
+        id="modal-sign-up-activate"
         title='Activate your account'
         size='sm'
         centered
@@ -142,6 +143,7 @@
     <!-- Error modal -->
     <b-modal
         v-model="isSignUpApiStatusError"
+        id="modal-sign-up-error"
         title='Sign up error'
         size='sm'
         buttonSize='sm'
@@ -183,7 +185,6 @@
           password: '',
           re_password: '',
         },
-        show: this.showSignUpModal,
       }
     },
     validations: {
@@ -207,9 +208,6 @@
           sameAsPassword: sameAs('password'),
         },
       },
-    },
-    mounted() {
-      this.show = true;
     },
     computed: {
       ...mapGetters(['signUpApiStatus', 'authErrorMsg', 'showSignUpModal']),
@@ -265,15 +263,17 @@
 
       onActivateOkBtn() {
         this.resetFormValues();
-        this.$store.commit('updateSignUnApiStatus', apiStatusList.INIT);
+        this.$store.commit('updateSignUpApiStatus', apiStatusList.INIT);
       },
 
       onErrorRetryBtn() {
         this.resetFormValues();
-        this.$store.commit('updateSignUnApiStatus', apiStatusList.INIT);
+        this.$store.commit('updateSignUpApiStatus', apiStatusList.INIT);
+        this.$bvModal.hide('modal-sign-up-error');
       },
 
       onErrorCancelBtn() {
+        this.$bvModal.hide('modal-sign-up-error');
         this.$bvModal.hide('modal-sign-up');
       },
     },
