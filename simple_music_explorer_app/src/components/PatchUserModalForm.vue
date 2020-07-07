@@ -54,6 +54,31 @@
 
     </b-modal>
 
+    <!-- Activation message modal -->
+    <b-modal
+        v-model="isPatchUserApiStatusLoaded"
+        id="modal-patch-user-confirm"
+        title='Confirm changes'
+        size='sm'
+        centered
+        no-close-on-backdrop
+        no-close-on-esc
+        hide-header-close
+        @ok="onConfirmOkBtn"
+    >
+      <p class="my-4">
+        Please check your email.
+      </p>
+
+      <!-- Customized modal buttons -->
+      <template v-slot:modal-footer="{ ok }">
+      <b-button size="sm" variant="secondary" @click="ok()">
+        Close
+      </b-button>
+    </template>
+
+    </b-modal>
+
     <!-- Error modal -->
     <b-modal
         v-model="isPatchUserApiStatusError"
@@ -111,6 +136,10 @@
         return +this.patchUserApiStatus === apiStatusList.LOADING;
       },
 
+      isPatchUserApiStatusLoaded() {
+        return +this.patchUserApiStatus === apiStatusList.LOADED;
+      },
+
       isPatchUserApiStatusError() {
         return +this.patchUserApiStatus === apiStatusList.ERROR;
       },
@@ -150,6 +179,12 @@
       validateState(key) {
         const { $dirty, $error } = this.$v.form[key];
         return $dirty ? !$error : null;
+      },
+
+      onConfirmOkBtn() {
+        this.resetFormValues();
+        this.$store.commit('updatePatchUserApiStatus', apiStatusList.INIT);
+        this.$bvModal.hide('modal-patch-user');
       },
 
       onErrorRetryBtn() {
