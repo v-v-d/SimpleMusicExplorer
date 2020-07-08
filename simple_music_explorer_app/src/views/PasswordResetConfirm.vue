@@ -1,12 +1,12 @@
 <template>
   <div>
 
-    <!-- Main username reset confirm modal -->
+    <!-- Main password reset confirm modal -->
     <b-modal
-        v-model="isUsernameResetConfirmApiStatusInit"
-        id="modal-username-reset-confirm"
+        v-model="isPasswordResetConfirmApiStatusInit"
+        id="modal-password-reset-confirm"
         scrollable
-        title="Username Reset Confirm Form"
+        title="Password Reset Confirm Form"
         @show="resetFormValues"
         @hidden="resetFormValues"
         @cancel="resetFormValues"
@@ -14,46 +14,40 @@
     >
       <b-form @submit.stop.prevent="handleSubmit">
 
-        <!-- new_username input -->
+        <!-- new_password input -->
         <b-form-group
             id="input-group-1"
-            label="New username:"
+            label="New password:"
             label-for="input-1"
+            description="Your password must be 8-20 characters long, contain only letters and numbers."
         >
           <b-form-input
               id="input-1"
-              v-model="$v.form.new_username.$model"
-              :state="validateState('new_username')"
-              aria-describedby="input-live-feedback"
-              placeholder="Enter new username"
-              trim
+              v-model="$v.form.new_password.$model"
+              :state="validateState('new_password')"
+              placeholder="Enter new password"
+              type="password"
           ></b-form-input>
-
-          <!-- This will only be shown if the preceding input has an invalid state -->
-          <b-form-invalid-feedback id="input-live-feedback">
-            This is a required field and must be at least
-            {{ $v.form.new_username.$params.minLength.min }} characters.
-          </b-form-invalid-feedback>
         </b-form-group>
 
         <!-- re_new_password input -->
         <b-form-group
             id="input-group-4"
-            label="Repeat new username:"
+            label="Repeat new password:"
             label-for="input-4"
         >
           <b-form-input
               id="input-4"
-              v-model="$v.form.re_new_username.$model"
-              :state="validateState('re_new_username')"
+              v-model="$v.form.re_new_password.$model"
+              :state="validateState('re_new_password')"
               aria-describedby="input-live-feedback"
-              placeholder="Enter new username one more time"
-              trim
+              placeholder="Enter new password one more time"
+              type="password"
           ></b-form-input>
 
           <!-- This will only be shown if the preceding input has an invalid state -->
           <b-form-invalid-feedback id="input-live-feedback">
-            Usernames must be the same.
+            Passwords must be the same.
           </b-form-invalid-feedback>
         </b-form-group>
 
@@ -65,11 +59,11 @@
           Cancel
         </b-button>
 
-        <b-button v-if="!isUsernameResetConfirmApiStatusLoading" variant="success" @click="ok()">
+        <b-button v-if="!isPasswordResetConfirmApiStatusLoading" variant="success" @click="ok()">
           Reset
         </b-button>
 
-        <b-button v-if="isUsernameResetConfirmApiStatusLoading" variant="secondary" disabled>
+        <b-button v-if="isPasswordResetConfirmApiStatusLoading" variant="secondary" disabled>
           <b-spinner small/>
           Reset...
         </b-button>
@@ -79,7 +73,7 @@
 
     <!-- Success message modal -->
     <b-modal
-        v-model="isUsernameResetConfirmApiStatusLoaded"
+        v-model="isPasswordResetConfirmApiStatusLoaded"
         title='Success'
         size='sm'
         centered
@@ -89,7 +83,7 @@
         @ok="redirect"
     >
       <p class="my-4">
-        Username resetting succeeded!
+        Password resetting succeeded!
       </p>
 
       <!-- Customized modal buttons -->
@@ -103,9 +97,9 @@
 
     <!-- Error modal -->
     <b-modal
-        v-model="isUsernameResetConfirmApiStatusError"
-        id="modal-username-reset-confirm-error"
-        title='Username resetting error'
+        v-model="isPasswordResetConfirmApiStatusError"
+        id="modal-password-reset-confirm-error"
+        title='Password resetting error'
         size='sm'
         buttonSize='sm'
         okVariant='success'
@@ -120,7 +114,7 @@
         @cancel="onErrorCancelBtn"
     >
       <p class="my-4">
-        Please retry to reset username. Error: {{ userErrorMsg }}
+        Please retry to reset password. Error: {{ userErrorMsg }}
       </p>
     </b-modal>
 
@@ -131,54 +125,56 @@
   import { mapGetters, mapActions } from 'vuex';
   import apiStatusList from "@/store/apiStatusList";
   import router from "@/router";
-  import { minLength, required, sameAs } from "vuelidate/lib/validators";
+  import {alphaNum, maxLength, minLength, required, sameAs} from "vuelidate/lib/validators";
   import { validationMixin } from "vuelidate";
 
   export default {
-    name: "UsernameResetConfirm",
+    name: "PasswordResetConfirm",
     mixins: [validationMixin],
     props: ['uid', 'token'],
     data() {
       return {
         form: {
-          new_username: '',
-          re_new_username: '',
+          new_password: '',
+          re_new_password: '',
         },
       };
     },
     validations: {
       form: {
-        new_username: {
+        new_password: {
           required,
-          minLength: minLength(3),
+          minLength: minLength(8),
+          maxLength: maxLength(20),
+          alphaNum,
         },
-        re_new_username: {
+        re_new_password: {
           required,
-          sameAsPassword: sameAs('new_username'),
+          sameAsPassword: sameAs('new_password'),
         },
       },
     },
     computed: {
-      ...mapGetters(['resetUsernameConfirmApiStatus', 'userErrorMsg']),
+      ...mapGetters(['resetPasswordConfirmApiStatus', 'userErrorMsg']),
 
-      isUsernameResetConfirmApiStatusInit() {
-        return +this.resetUsernameConfirmApiStatus === apiStatusList.INIT;
+      isPasswordResetConfirmApiStatusInit() {
+        return +this.resetPasswordConfirmApiStatus === apiStatusList.INIT;
       },
 
-      isUsernameResetConfirmApiStatusLoading() {
-        return +this.resetUsernameConfirmApiStatus === apiStatusList.LOADING;
+      isPasswordResetConfirmApiStatusLoading() {
+        return +this.resetPasswordConfirmApiStatus === apiStatusList.LOADING;
       },
 
-      isUsernameResetConfirmApiStatusLoaded() {
-        return +this.resetUsernameConfirmApiStatus === apiStatusList.LOADED;
+      isPasswordResetConfirmApiStatusLoaded() {
+        return +this.resetPasswordConfirmApiStatus === apiStatusList.LOADED;
       },
 
-      isUsernameResetConfirmApiStatusError() {
-        return +this.resetUsernameConfirmApiStatus === apiStatusList.ERROR;
+      isPasswordResetConfirmApiStatusError() {
+        return +this.resetPasswordConfirmApiStatus === apiStatusList.ERROR;
       },
     },
     methods: {
-      ...mapActions(['resetUsernameConfirm']),
+      ...mapActions(['resetPasswordConfirm']),
 
       redirect() {
         router.push({ name: 'Index' });
@@ -198,7 +194,7 @@
             token: this.token,
             ...this.form,
           };
-          this.resetUsernameConfirm(data);
+          this.resetPasswordConfirm(data);
         }
       },
 
@@ -226,21 +222,21 @@
 
       onErrorRetryBtn() {
         this.resetFormValues();
-        this.$store.commit('updateResetUsernameConfirmApiStatus', apiStatusList.INIT);
-        this.$bvModal.hide('modal-username-reset-confirm-error');
+        this.$store.commit('updateResetPasswordConfirmApiStatus', apiStatusList.INIT);
+        this.$bvModal.hide('modal-password-reset-confirm-error');
       },
 
       onErrorCancelBtn() {
-        this.$bvModal.hide('modal-username-reset-confirm-error');
-        this.$bvModal.hide('modal-username-reset-confirm');
+        this.$bvModal.hide('modal-password-reset-confirm-error');
+        this.$bvModal.hide('modal-password-reset-confirm');
         this.redirect();
       },
     },
     created() {
-      this.$bvModal.show('modal-username-reset-confirm');
+      this.$bvModal.show('modal-password-reset-confirm');
     },
     watch: {
-      $route: 'resetUsernameConfirm',
+      $route: 'resetPasswordConfirm',
     },
   }
 </script>

@@ -22,6 +22,12 @@ const routes = [
     component: () => import(/* webpackChunkName: "UsernameResetConfirm" */ '../views/UsernameResetConfirm.vue')
   },
   {
+    path: '/password/reset/confirm/:uid/:token/',
+    name: 'Password reset confirm',
+    props: true,
+    component: () => import(/* webpackChunkName: "PasswordResetConfirm" */ '../views/PasswordResetConfirm.vue')
+  },
+  {
     path: '/about',
     name: 'About',
     component: () => import(/* webpackChunkName: "about" */ '../views/About.vue')

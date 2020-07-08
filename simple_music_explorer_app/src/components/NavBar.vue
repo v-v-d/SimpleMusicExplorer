@@ -42,6 +42,7 @@
             <b-dropdown-item v-if="isToken" @click="showPatchUserModal">Update user</b-dropdown-item>
             <b-dropdown-item v-if="isToken" @click="showDeleteUserModal">Delete user</b-dropdown-item>
             <b-dropdown-item v-if="isToken" @click="showResetUsernameModal">Change username</b-dropdown-item>
+            <b-dropdown-item v-if="isToken" @click="showResetPasswordModal">Change password</b-dropdown-item>
 
             <b-dropdown-item v-if="isToken" @click="signOut">Sign Out</b-dropdown-item>
 
@@ -74,7 +75,7 @@
     },
     computed: mapGetters(['isToken', 'user']),
     methods: {
-      ...mapActions(['signOut', 'deleteUser', 'resetUsername']),
+      ...mapActions(['signOut', 'deleteUser', 'resetUsername', 'resetPassword']),
 
       showSignUpModal() {
         this.$bvModal.show('modal-sign-up');
@@ -125,6 +126,32 @@
             if (result) {
               const data = {email: this.user.email}
               this.resetUsername(data);
+
+              this.$bvModal.msgBoxOk('Please check your email', {
+                buttonSize: 'sm',
+                centered: true,
+                size: 'sm',
+              })
+            }
+          })
+      },
+
+      showResetPasswordModal() {
+        const msg = 'Please confirm that you want to reset password.'
+        this.$bvModal.msgBoxConfirm(msg, {
+          title: 'Please Confirm',
+          size: 'sm',
+          buttonSize: 'sm',
+          okVariant: 'success',
+          okTitle: 'RESET',
+          cancelTitle: 'CANCEL',
+          footerClass: 'p-2',
+          centered: true
+        })
+          .then(result => {
+            if (result) {
+              const data = {email: this.user.email}
+              this.resetPassword(data);
 
               this.$bvModal.msgBoxOk('Please check your email', {
                 buttonSize: 'sm',

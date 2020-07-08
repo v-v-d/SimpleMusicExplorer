@@ -209,15 +209,84 @@ export default {
         ctx.commit('updateResetUsernameConfirmApiStatus', apiStatusList.ERROR);
         ctx.commit('updateAuthErrorMessage', 'Token is not exists.');
       }
-
     },
 
-    resetPassword(ctx) {
-      console.log(ctx)
+    resetPassword(ctx, data) {
+      if (ctx.getters.isToken) {
+        ctx.commit('updateResetPasswordApiStatus', apiStatusList.LOADING);
+
+        fetch(`${ctx.getters.apiAuth}/users/reset_password/`, {
+          method: 'POST',
+          body: JSON.stringify(data),
+          headers: {
+            'Content-type': 'application/json',
+            'Authorization': localStorage.getItem('token'),
+          },
+        })
+          .then(response => {
+            switch (response.status) {
+              case 204:
+                ctx.commit('updateResetPasswordApiStatus', apiStatusList.LOADED);
+                break;
+              case 400:
+                return response.json();
+              default:
+                throw Error(`${response.status}: ${response.statusText}`);
+            }
+          })
+          .then(data => {
+            if (data) {
+              const error = Object.values(data).flat().join(', ');
+              throw Error(error);
+            }
+          })
+          .catch(error => {
+            ctx.commit('updateResetPasswordApiStatus', apiStatusList.ERROR);
+            ctx.commit('updateUserErrorMessage', error.message);
+          })
+      } else {
+        ctx.commit('updateResetPasswordApiStatus', apiStatusList.ERROR);
+        ctx.commit('updateAuthErrorMessage', 'Token is not exists.');
+      }
     },
 
-    resetPasswordConfirm(ctx) {
-      console.log(ctx)
+    resetPasswordConfirm(ctx, data) {
+      if (ctx.getters.isToken) {
+        ctx.commit('updateResetPasswordConfirmApiStatus', apiStatusList.LOADING);
+
+        fetch(`${ctx.getters.apiAuth}/users/reset_password_confirm/`, {
+          method: 'POST',
+          body: JSON.stringify(data),
+          headers: {
+            'Content-type': 'application/json',
+            'Authorization': localStorage.getItem('token'),
+          },
+        })
+          .then(response => {
+            switch (response.status) {
+              case 204:
+                ctx.commit('updateResetPasswordConfirmApiStatus', apiStatusList.LOADED);
+                break;
+              case 400:
+                return response.json();
+              default:
+                throw Error(`${response.status}: ${response.statusText}`);
+            }
+          })
+          .then(data => {
+            if (data) {
+              const error = Object.values(data).flat().join(', ');
+              throw Error(error);
+            }
+          })
+          .catch(error => {
+            ctx.commit('updateResetPasswordConfirmApiStatus', apiStatusList.ERROR);
+            ctx.commit('updateUserErrorMessage', error.message);
+          })
+      } else {
+        ctx.commit('updateResetPasswordConfirmApiStatus', apiStatusList.ERROR);
+        ctx.commit('updateAuthErrorMessage', 'Token is not exists.');
+      }
     },
 
   },
