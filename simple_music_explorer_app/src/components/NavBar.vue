@@ -41,6 +41,7 @@
 <!--            <b-dropdown-item :to="{ name: 'account' }" v-if="isToken">Account</b-dropdown-item>-->
             <b-dropdown-item v-if="isToken" @click="showPatchUserModal">Update user</b-dropdown-item>
             <b-dropdown-item v-if="isToken" @click="showDeleteUserModal">Delete user</b-dropdown-item>
+            <b-dropdown-item v-if="isToken" @click="showResetUsernameModal">Change username</b-dropdown-item>
 
             <b-dropdown-item v-if="isToken" @click="signOut">Sign Out</b-dropdown-item>
 
@@ -71,9 +72,9 @@
       PatchUserModalForm,
       DeleteUserModalForm,
     },
-    computed: mapGetters(['isToken']),
+    computed: mapGetters(['isToken', 'user']),
     methods: {
-      ...mapActions(['signOut', 'deleteUser']),
+      ...mapActions(['signOut', 'deleteUser', 'resetUsername']),
 
       showSignUpModal() {
         this.$bvModal.show('modal-sign-up');
@@ -104,6 +105,32 @@
           .then(result => {
             if (result) {
               this.$bvModal.show('modal-delete-user');
+            }
+          })
+      },
+
+      showResetUsernameModal() {
+        const msg = 'Please confirm that you want to reset username.'
+        this.$bvModal.msgBoxConfirm(msg, {
+          title: 'Please Confirm',
+          size: 'sm',
+          buttonSize: 'sm',
+          okVariant: 'success',
+          okTitle: 'RESET',
+          cancelTitle: 'CANCEL',
+          footerClass: 'p-2',
+          centered: true
+        })
+          .then(result => {
+            if (result) {
+              const data = {email: this.user.email}
+              this.resetUsername(data);
+
+              this.$bvModal.msgBoxOk('Please check your email', {
+                buttonSize: 'sm',
+                centered: true,
+                size: 'sm',
+              })
             }
           })
       },

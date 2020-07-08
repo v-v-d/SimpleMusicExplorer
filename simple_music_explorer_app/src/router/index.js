@@ -16,6 +16,12 @@ const routes = [
     component: () => import(/* webpackChunkName: "UserActivation" */ '../views/UserActivation.vue')
   },
   {
+    path: '/username/reset/confirm/:uid/:token/',
+    name: 'Username reset confirm',
+    props: true,
+    component: () => import(/* webpackChunkName: "UsernameResetConfirm" */ '../views/UsernameResetConfirm.vue')
+  },
+  {
     path: '/about',
     name: 'About',
     component: () => import(/* webpackChunkName: "about" */ '../views/About.vue')

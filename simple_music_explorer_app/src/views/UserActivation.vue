@@ -17,6 +17,8 @@
         no-close-on-backdrop
         no-close-on-esc
         hide-header-close
+        @ok="redirect"
+        @cancel="redirect"
     >
       <p class="my-4">
         Account activation succeeded! Now sign in please.
