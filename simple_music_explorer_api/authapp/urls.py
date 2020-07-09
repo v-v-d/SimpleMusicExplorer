@@ -1,10 +1,14 @@
 from django.urls import path, re_path, include
+from django.views.decorators.csrf import csrf_exempt
 
+from .views import url_redirect_404
 
 urlpatterns = [
+    path('users/set_username/', url_redirect_404),  # блокировка url
+
     path('', include('djoser.urls')),
     path('', include('djoser.urls.authtoken')),
-    path('', include('djoser.urls.jwt')),
+    # path('', include('djoser.urls.jwt')),
 ]
 # /users/
 # /users/me/
