@@ -37,6 +37,7 @@
 
             <b-dropdown-item v-if="!isToken" @click="showSignUpModal">Sign Up</b-dropdown-item>
             <b-dropdown-item v-if="!isToken" @click="showSignInModal">Sign In</b-dropdown-item>
+            <b-dropdown-item v-if="!isToken" @click="showResendActivationModal">Resend Activation Email</b-dropdown-item>
 
 <!--            <b-dropdown-item :to="{ name: 'account' }" v-if="isToken">Account</b-dropdown-item>-->
             <b-dropdown-item v-if="isToken" @click="showPatchUserModal">Update user</b-dropdown-item>
@@ -50,6 +51,7 @@
             <SignUpModalForm/>
             <PatchUserModalForm/>
             <DeleteUserModalForm/>
+            <ResendActivationModalForm/>
 
           </b-nav-item-dropdown>
         </b-navbar-nav>
@@ -63,6 +65,7 @@
   import SignUpModalForm from '@/components/SignUpModalForm.vue';
   import PatchUserModalForm from '@/components/PatchUserModalForm.vue';
   import DeleteUserModalForm from '@/components/DeleteUserModalForm.vue';
+  import ResendActivationModalForm from '@/components/ResendActivationModalForm.vue';
   import { mapGetters, mapActions } from 'vuex';
 
   export default {
@@ -72,6 +75,7 @@
       SignUpModalForm,
       PatchUserModalForm,
       DeleteUserModalForm,
+      ResendActivationModalForm,
     },
     computed: mapGetters(['isToken', 'user']),
     methods: {
@@ -82,8 +86,11 @@
       },
 
       showSignInModal() {
-        console.log('show sign in modal')
         this.$bvModal.show('modal-sign-in');
+      },
+
+      showResendActivationModal() {
+        this.$bvModal.show('modal-resend-activation');
       },
 
       showPatchUserModal() {
