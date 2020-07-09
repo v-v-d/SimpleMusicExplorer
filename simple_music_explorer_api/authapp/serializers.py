@@ -1,4 +1,3 @@
-# from djoser.serializers import UserSerializer, UserCreateSerializer as BaseUserRegistrationSerializer
 from rest_framework import serializers
 
 from .models import User
