@@ -71,6 +71,7 @@
     <!-- Error modal -->
     <b-modal
         v-model="isSignInProcessError"
+        id="modal-sign-in-error"
         title='Sign in error'
         size='sm'
         buttonSize='sm'

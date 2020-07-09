@@ -1,6 +1,6 @@
 <template>
   <div class="footer-copyright text-center py-3">© {{ new Date().getFullYear() }} Copyright:
-    <router-link :to="{ name: 'albums' }" class="logo-link">Simple Music Explorer</router-link>
+    <router-link :to="{ name: 'Index' }" class="logo-link">Simple Music Explorer</router-link>
   </div>
 </template>
 
