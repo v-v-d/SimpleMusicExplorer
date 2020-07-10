@@ -61,7 +61,8 @@ INSTALLED_APPS = [
 
     'authapp',
     'merchapp',
-    'musicapp'
+    'musicapp',
+    'basketapp',
 ]
 
 MIDDLEWARE = [
