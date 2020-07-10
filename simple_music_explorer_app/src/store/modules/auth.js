@@ -78,8 +78,35 @@ export default {
         });
     },
 
-    resendActivation(ctx) {
-      console.log(ctx)
+    resendActivation(ctx, data) {
+      fetch(`${ctx.getters.apiAuth}/users/resend_activation/`, {
+        method: 'POST',
+        body: JSON.stringify(data),
+        headers: {
+          'Content-type': 'application/json',
+        },
+      })
+        .then(response => {
+          switch (response.status) {
+            case 204:
+              ctx.commit('updateResendActivationApiStatus', apiStatusList.LOADED);
+              break;
+            case 400:
+              return response.json();
+            default:
+              throw Error(`${response.status}: ${response.statusText}`);
+          }
+        })
+        .then(data => {
+          if (data) {
+            const error = Object.values(data).flat().join(', ');
+            throw Error(error);
+          }
+        })
+        .catch(error => {
+          ctx.commit('updateResendActivationApiStatus', apiStatusList.ERROR);
+          ctx.commit('updateUserErrorMessage', error.message);
+        })
     },
 
     signIn(ctx, data) {
@@ -163,6 +190,10 @@ export default {
       state.activateApiStatus = apiStatus;
     },
 
+    updateResendActivationApiStatus(state, apiStatus) {
+      state.resendActivationApiStatus = apiStatus;
+    },
+
     updateSignInApiStatus(state, apiStatus) {
       state.signInApiStatus = apiStatus;
     },
@@ -190,6 +221,7 @@ export default {
   state: {
     signUpApiStatus: apiStatusList.INIT,
     activateApiStatus: apiStatusList.INIT,
+    resendActivationApiStatus: apiStatusList.INIT,
     signInApiStatus: apiStatusList.INIT,
     signOutApiStatus: apiStatusList.INIT,
 
@@ -206,6 +238,10 @@ export default {
 
     activateApiStatus(state) {
       return state.activateApiStatus;
+    },
+
+    resendActivationApiStatus(state) {
+      return state.resendActivationApiStatus;
     },
 
     signInApiStatus(state) {
