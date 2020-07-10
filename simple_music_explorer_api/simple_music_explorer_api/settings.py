@@ -62,6 +62,7 @@ INSTALLED_APPS = [
     'authapp',
     'merchapp',
     'musicapp',
+    'orderapp',
     'basketapp',
 ]
 
