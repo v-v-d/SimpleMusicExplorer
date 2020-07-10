@@ -29,4 +29,5 @@ urlpatterns = [
     path('api/v1/auth/', include('authapp.urls'), name='auth'),
     path('api/v1/', include('musicapp.urls'), name='music'),
     path('api/v1/merch/', include('merchapp.urls'), name='merch'),
+    path('api/v1/basket/', include('basketapp.urls'), name='basket'),
 ]
