@@ -11,7 +11,7 @@ class ProductListView(APIView):
     "output a list of products"
 
     def get(self, request):
-        products = Product.objects.filter(is_active=True)
+        products = Product.objects.filter(active=True)
         serializer = ProductSerializer(products, many=True)
         return Response(serializer.data)
 
@@ -20,6 +20,6 @@ class ProductDetailView(APIView):
     "output of product"
 
     def get(self, request, pk):
-        product = Product.objects.get(id=pk, is_active=True)
+        product = Product.objects.get(id=pk, active=True)
         serializer = ProductDetailSerializer(product)
         return Response(serializer.data)

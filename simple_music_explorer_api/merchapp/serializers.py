@@ -8,7 +8,7 @@ class ProductSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Product
-        exclude = ('quantity', 'is_active')
+        exclude = ('quantity', 'active')
 
 
 class ProductDetailSerializer(serializers.ModelSerializer):
@@ -18,4 +18,4 @@ class ProductDetailSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Product
-        exclude = ('quantity', 'is_active')
+        exclude = ('quantity', 'active')

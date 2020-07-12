@@ -2,6 +2,7 @@ from django.db import models
 from django.db.models import Sum, F
 
 from authapp.models import User
+from coreapp.models import Core
 from merchapp.models import Product
 from musicapp.models import AlbumModel
 
@@ -28,11 +29,14 @@ class BasketItemManager(models.QuerySet):
         return self.aggregate(total_summ=Sum(F('quantity') * F('price'), output_field=models.DecimalField())) ['total_summ'] or 0.00
 
 
-class BasketItemModel(models.Model):
+class BasketItemModel(Core):
     album = models.ForeignKey(AlbumModel, blank=True, null=True, on_delete=models.CASCADE)
     merch = models.ForeignKey(Product, blank=True, null=True, on_delete=models.CASCADE)
     price = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     quantity = models.IntegerField(max_length=3, blank=False, default=1)
+
+    def delete(self, **kwargs):
+        return super().delete(force=True)
 
 
 class BasketManager(models.QuerySet):
@@ -50,10 +54,14 @@ class BasketManager(models.QuerySet):
             return obj
 
 
-class BasketModel(models.Model):
+class BasketModel(Core):
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
     subtotal = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     total = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     basket_items = models.ManyToManyField(BasketItemModel)
     objects = BasketManager.as_manager()
+
+    def delete(self, **kwargs):
+        return super().delete(force=True)
+
 

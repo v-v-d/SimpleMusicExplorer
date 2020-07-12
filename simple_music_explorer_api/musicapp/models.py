@@ -1,8 +1,7 @@
-from datetime import date
-
 from django.db import models
 
 from authapp.models import User
+from coreapp.models import Core
 
 
 class FileModel(models.Model):
@@ -24,17 +23,14 @@ class ArtistModel(models.Model):
         return self.name
 
 
-class AlbumModel(models.Model):
+class AlbumModel(Core):
     class Meta:
         constraints = [
             models.CheckConstraint(check=models.Q(price__gte=0), name='price_gte_0'),
         ]
 
-    title = models.CharField(max_length=64, null=False)
     price = models.FloatField(default=0, null=False)
     genre = models.CharField(max_length=32)
-    date = models.DateField(default=date.today)
-    description = models.CharField(max_length=512)
     artist = models.ForeignKey(ArtistModel, null=False, on_delete=models.CASCADE)
     cover = models.ManyToManyField(FileModel, blank=True)
 
@@ -42,14 +38,14 @@ class AlbumModel(models.Model):
         return f'{self.title}'
 
 
-class TrackModel(models.Model):
+class TrackModel(Core):
     class Meta:
         unique_together = ['album', 'order']
         ordering = ['order']
 
     artist = models.ForeignKey(ArtistModel, null=False, on_delete=models.CASCADE)
-    title = models.CharField(max_length=64, null=False)
     album = models.ForeignKey('AlbumModel', related_name='tracks', null=False, on_delete=models.DO_NOTHING)
+    audio_file = models.FileField(upload_to='audio')
     order = models.SmallIntegerField()
 
     def __str__(self):
