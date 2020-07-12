@@ -77,12 +77,10 @@ class ProductToOrder(Core):
     category = models.CharField(max_length=100)
     image = models.ImageField(upload_to='products_images', blank=True)
     short_desc = models.CharField(max_length=60, blank=True)
-    price = models.DecimalField(max_digits=8, decimal_places=2, default=0)
 
 
 class AlbumToOrder(Core):
 
-    price = models.FloatField(default=0, null=False)
     genre = models.CharField(max_length=32)
     artist = models.CharField(max_length=100)
 
