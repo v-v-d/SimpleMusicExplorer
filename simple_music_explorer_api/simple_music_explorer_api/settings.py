@@ -59,11 +59,14 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'djoser',
 
+    'coreapp',
     'authapp',
     'merchapp',
     'musicapp',
     'orderapp',
     'basketapp',
+    'sellerapp',
+    'customerapp',
 ]
 
 MIDDLEWARE = [

@@ -1,7 +1,9 @@
-from rest_framework.routers import DefaultRouter
+from django.urls import path
 
-from basketapp.views import BasketViewSet
+from .views import *
 
-router = DefaultRouter()
-router.register(r'', BasketViewSet, basename='basket')
-urlpatterns = router.urls
+urlpatterns = [
+    path('', BasketViewSet),
+    path('change-basket/<int:pk>/', BasketChangeItem.as_view()),
+]
+

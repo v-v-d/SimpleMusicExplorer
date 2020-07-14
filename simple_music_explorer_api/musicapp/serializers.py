@@ -18,6 +18,7 @@ class TrackListSerializer(serializers.ListSerializer):
 
 class TrackSerializer(serializers.ModelSerializer):
     album = serializers.PrimaryKeyRelatedField(queryset=AlbumModel.objects.all())
+    title = serializers.CharField(max_length=100, required=True)
 
     class Meta:
         model = TrackModel
@@ -28,6 +29,7 @@ class TrackSerializer(serializers.ModelSerializer):
 class AlbumSerializer(serializers.ModelSerializer):
     tracks = TrackSerializer(many=True, read_only=True)
     cover = serializers.StringRelatedField(many=True)
+    title = serializers.CharField(max_length=100, required=True)
 
     class Meta:
         model = AlbumModel
@@ -40,7 +42,7 @@ class ArtistSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ArtistModel
-        fields = ('id', 'user', 'name', 'location', 'bio', 'website')
+        fields = ('id', 'user', 'name', 'location', 'bio', 'website', 'logo')
 
 
 class ArtistCreateSerializer(serializers.ModelSerializer):
@@ -48,8 +50,8 @@ class ArtistCreateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ArtistModel
-        fields = ('name', 'location', 'bio', 'website')
+        fields = ('name', 'location', 'bio', 'website', 'logo')
 
     def create(self, validated_data):
-        artist = ArtistModel.objects.update_or_create(**validated_data)
+        artist, _ = ArtistModel.objects.update_or_create(**validated_data)
         return artist

@@ -30,4 +30,7 @@ urlpatterns = [
     path('api/v1/', include('musicapp.urls'), name='music'),
     path('api/v1/merch/', include('merchapp.urls'), name='merch'),
     path('api/v1/basket/', include('basketapp.urls'), name='basket'),
+    path('api/v1/order/', include('orderapp.urls'), name='order'),
+    path('api/v1/seller/', include('sellerapp.urls'), name='seller'),
+    path('api/v1/customer/', include('customerapp.urls'), name='customer'),
 ]
