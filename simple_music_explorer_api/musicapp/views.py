@@ -5,7 +5,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from musicapp.models import AlbumModel, TrackModel, ArtistModel
-from musicapp.permissions import IsOwnerOrReadOnly
+from musicapp.permissions import IsOwnerOrReadOnly, IsArtistOrReadOnly
 from musicapp.serializers import AlbumSerializer, TrackSerializer, FileSerializer, ArtistSerializer, \
     ArtistCreateSerializer
 
@@ -26,7 +26,7 @@ class UserArtistView(APIView):
     """
     create and retrieve user artists
     """
-    permission_classes = [permissions.IsAuthenticated, IsOwnerOrReadOnly]
+    permission_classes = [permissions.IsAuthenticated, IsArtistOrReadOnly]
 
     def get(self, request):
         artist = ArtistModel.objects.filter(user=request.user)
@@ -45,7 +45,7 @@ class ArtistDetail(APIView):
     """
     retrieve, update and delete artists
     """
-    permission_classes = [permissions.IsAuthenticated, IsOwnerOrReadOnly]
+    permission_classes = [permissions.IsAuthenticated, IsArtistOrReadOnly]
 
     def get(self, request, pk):
         artist = get_object_or_404(ArtistModel, id=pk)

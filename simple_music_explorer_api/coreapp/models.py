@@ -19,3 +19,7 @@ class Core(models.Model):
             self.active = False
             self.save()
 
+
+class Article(Core):
+    pass
+

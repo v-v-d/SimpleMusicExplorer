@@ -2,6 +2,7 @@ from django.db import models
 
 # Create your models here.
 from coreapp.models import Core
+from musicapp.models import ArtistModel
 
 
 class ProductCategory(Core):
@@ -13,12 +14,13 @@ class ProductCategory(Core):
         return self.title
 
 
-class Product(models.Model):
+class Product(Core):
     class Meta:
         verbose_name = 'Продукт'
         verbose_name_plural = 'Продукты'
 
     category = models.ForeignKey(ProductCategory, on_delete=models.CASCADE)
+    artist = models.ForeignKey(ArtistModel, on_delete=models.CASCADE)
     image = models.ImageField(upload_to='products_images', blank=True)
     short_desc = models.CharField(verbose_name='Product short description', max_length=60, blank=True)
     price = models.DecimalField(verbose_name='Product price', max_digits=8, decimal_places=2, default=0)

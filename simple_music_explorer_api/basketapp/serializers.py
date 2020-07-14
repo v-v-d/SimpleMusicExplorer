@@ -13,4 +13,16 @@ class BasketSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = BasketModel
-        fields = ['owner', 'subtotal', 'total', 'basket_items']
+        fields = ('id', 'owner', 'album', 'merch', 'price', 'quantity')
+
+
+class BasketCreateSerializer(serializers.ModelSerializer):
+    """Сериализация создание корзины"""
+
+    class Meta:
+        model = BasketModel
+        fields = ('album', 'merch', 'price', 'quantity')
+
+    def create(self, validated_data):
+        basket, _ = BasketModel.objects.update_or_create(**validated_data)
+        return basket
