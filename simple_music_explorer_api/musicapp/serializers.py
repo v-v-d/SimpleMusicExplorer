@@ -42,7 +42,7 @@ class ArtistSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ArtistModel
-        fields = ('id', 'user', 'name', 'location', 'bio', 'website')
+        fields = ('id', 'user', 'name', 'location', 'bio', 'website', 'logo')
 
 
 class ArtistCreateSerializer(serializers.ModelSerializer):
@@ -50,7 +50,7 @@ class ArtistCreateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ArtistModel
-        fields = ('name', 'location', 'bio', 'website')
+        fields = ('name', 'location', 'bio', 'website', 'logo')
 
     def create(self, validated_data):
         artist, _ = ArtistModel.objects.update_or_create(**validated_data)
