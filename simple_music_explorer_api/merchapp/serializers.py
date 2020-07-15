@@ -23,5 +23,5 @@ class ProductCreateSerializer(serializers.ModelSerializer):
         fields = ('title', 'description', 'category', 'image', 'short_desc', 'price', 'quantity')
 
     def create(self, validated_data):
-        artist = Product.objects.update_or_create(**validated_data)
-        return artist
+        product, _ = Product.objects.update_or_create(**validated_data)
+        return product
