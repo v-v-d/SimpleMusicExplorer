@@ -179,3 +179,7 @@ CORS_ORIGIN_WHITELIST = (
     'http://127.0.0.1:8080',
     'http://localhost:8080',
 )
+
+# paypal setings
+RETURN_URL = 'http://127.0.0.1:8080/payment/done/'
+CANCEL_URL = 'http://127.0.0.1:8080/payment/cancel/'

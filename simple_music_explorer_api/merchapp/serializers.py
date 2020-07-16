@@ -6,11 +6,11 @@ from .models import Product
 
 class ProductSerializer(serializers.ModelSerializer):
     """Сериализация продукта"""
-    seller = ArtistSerializer()
+    artist = ArtistSerializer()
 
     class Meta:
         model = Product
-        fields = ('id', 'title', 'description', 'seller', 'category', 'image', 'short_desc', 'price')
+        fields = ('id', 'title', 'description', 'artist', 'category', 'image', 'short_desc', 'price')
 
 
 class ProductCreateSerializer(serializers.ModelSerializer):

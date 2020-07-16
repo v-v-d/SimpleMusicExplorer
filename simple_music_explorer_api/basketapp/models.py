@@ -12,11 +12,25 @@ class BasketModel(Core):
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
     album = models.ForeignKey(AlbumModel, blank=True, null=True, on_delete=models.CASCADE)
     merch = models.ForeignKey(Product, blank=True, null=True, on_delete=models.CASCADE)
+    type_product = models.CharField(max_length=1, choices=[('m', 'merch'), ('t', 'treck')], blank=True)
     price = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     quantity = models.IntegerField(blank=False, default=1)
 
-    def delete(self, **kwargs):
-        return super().delete(force=True)
+    def __str__(self):
+        if self.type_product == 'm':
+            return f'{self.owner}-{self.merch.title}'
+        else:
+            return f'{self.owner}-{self.album.title}'
+
+    def save(self, *args, **kwargs):
+        if self.merch:
+            self.type_product = 'm'
+            self.price = self.merch.price
+        else:
+            self.type_product = 't'
+            self.price = self.album.price
+
+        super().save(*args, **kwargs)
 
     def clean(self):
         if self.album and self.merch:
