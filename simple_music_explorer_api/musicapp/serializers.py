@@ -22,7 +22,7 @@ class TrackSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = TrackModel
-        fields = ('id', 'title', 'order', 'artist', 'album')
+        fields = ('id', 'title', 'order', 'artist', 'album', 'audio_file')
         list_serializer_class = TrackListSerializer
 
 

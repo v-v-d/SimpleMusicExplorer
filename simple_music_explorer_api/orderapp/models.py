@@ -47,7 +47,8 @@ class ProductOrAlbumToOrder(Core):
 class PurchasedTrack(Core):
 
     album = models.ForeignKey(ProductOrAlbumToOrder, related_name='prod_tracks', null=False, on_delete=models.CASCADE)
-    audio_file = models.FileField(upload_to='audio')
+    audio_file = models.CharField(max_length=200)
+    order = models.SmallIntegerField()
 
     objects = ActiveQuerySetManager.as_manager()
 

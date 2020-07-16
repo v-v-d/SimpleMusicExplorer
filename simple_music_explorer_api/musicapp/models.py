@@ -40,7 +40,6 @@ class AlbumModel(Core):
 
 class TrackModel(Core):
     class Meta:
-        unique_together = ['album', 'order']
         ordering = ['order']
 
     artist = models.ForeignKey(ArtistModel, null=False, on_delete=models.CASCADE)

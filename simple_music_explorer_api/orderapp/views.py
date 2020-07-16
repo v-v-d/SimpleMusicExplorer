@@ -5,7 +5,8 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from basketapp.models import BasketModel
-from orderapp.models import Address, Orders, ProductOrAlbumToOrder, OrderItem
+from musicapp.models import TrackModel
+from orderapp.models import Address, Orders, ProductOrAlbumToOrder, OrderItem, PurchasedTrack
 from orderapp.serializers import AddressSerializer, AddressCreateSerializer, ProductOrAlbumToOrderSerializer, \
     OrderItemSerializer, OrderSerializer
 
@@ -25,6 +26,7 @@ def create_orders(request, address_id):
         price = item.price
         quantity = item.quantity
         artist_name = None
+        tracks = None
         if item.type_product == 'm':
             artist = item.merch.artist
             obj = item.merch
@@ -32,6 +34,7 @@ def create_orders(request, address_id):
         else:
             artist = item.album.artist
             obj = item.album
+            tracks = TrackModel.objects.filter(album=obj)
             prod_album = obj
             artist_name = item.album.artist.name
 
@@ -43,7 +46,16 @@ def create_orders(request, address_id):
 
         fixed_product = ProductOrAlbumToOrder.objects.create(**prod_fields)
 
-        order, _ = Orders.objects.get_or_create(artist=artist, owner=owner, payment_state='NP', delivery_address=address)
+        if tracks:
+            for track in tracks:
+                PurchasedTrack.objects.create(album=fixed_product,
+                                              audio_file=track.audio_file.url,
+                                              order=track.order)
+
+        order, _ = Orders.objects.get_or_create(artist=artist,
+                                                owner=owner,
+                                                payment_state='NP',
+                                                delivery_address=address)
 
         order.total_sum = order.total_sum + float(price * quantity)
         order.save()

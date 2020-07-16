@@ -31,7 +31,7 @@ class PurchasedTrackSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = PurchasedTrack
-        fields = ('id', 'title', 'album')
+        fields = ('id', 'title', 'album', 'order', 'audio_file')
 
 
 class ProductOrAlbumToOrderSerializer(serializers.ModelSerializer):
