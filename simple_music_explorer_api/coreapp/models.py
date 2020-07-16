@@ -12,12 +12,12 @@ class Core(models.Model):
     def __str__(self):
         return f'{self.title}' if self.title else ''
 
-    def delete(self, **kwargs):
-        if 'force' in kwargs:
-            super().delete()
-        else:
-            self.active = False
-            self.save()
+    # def delete(self, **kwargs):
+    #     if 'force' in kwargs:
+    #         super().delete()
+    #     else:
+    #         self.active = False
+    #         self.save()
 
 
 class Article(Core):
