@@ -70,7 +70,7 @@ class PaymentView(APIView):
 
     def post(self, request):
         order_id = request.data.get('order_id')
-        order = get_object_or_404(Orders, id=order_id)
+        order = get_object_or_404(Orders, id=order_id, owner=request.user, payment_state='NP')
 
         billing = BillingInformation(seller=order.artist)
         client_id = billing.client_id
