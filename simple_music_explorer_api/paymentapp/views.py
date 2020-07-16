@@ -69,7 +69,7 @@ class PaymentView(APIView):
     permission_classes = [permissions.IsAuthenticated, ]
 
     def post(self, request):
-        order_id = address_id = request.data.get('order_id')
+        order_id = request.data.get('order_id')
         order = get_object_or_404(Orders, id=order_id)
 
         billing = BillingInformation(seller=order.artist)
