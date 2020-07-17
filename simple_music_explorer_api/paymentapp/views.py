@@ -82,8 +82,14 @@ class PaymentView(APIView):
 
 
 class PaymentDoneView(APIView):
+    """
+        В этой вью будет меняться статус заказа на оплачено
+    """
     pass
 
 
 class PaymentCancelView(APIView):
+    """
+        В этой вью будет удаляться заказ и все его зависимости
+    """
     pass
