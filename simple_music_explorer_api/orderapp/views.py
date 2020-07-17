@@ -45,7 +45,7 @@ def create_orders(request, address_id):
         else:
             prod_fields['category'] = obj.category.title
             prod_fields['short_desc'] = obj.short_desc
-
+        prod_fields['title'] = obj.title
         fixed_product = ProductOrAlbumToOrder.objects.create(**prod_fields)
         if not artist_name:
             fixed_product.image.set(obj.image.all())
@@ -61,12 +61,12 @@ def create_orders(request, address_id):
                                                 owner=owner,
                                                 payment_state='NP',
                                                 delivery_address=address)
-
         order.total_sum = order.total_sum + float(price * quantity)
         order.save()
 
         if order not in order_list:
             order_list.append(order)
+
         order_item_dict = dict()
         order_item_dict['order'] = order
         order_item_dict['fixed_product'] = fixed_product
@@ -75,7 +75,6 @@ def create_orders(request, address_id):
         order_item_dict['type_product'] = item.type_product
         order_item_dict['price'] = price
         order_item_dict['quantity'] = quantity
-
         OrderItem.objects.create(**order_item_dict)
 
     basket.delete()
