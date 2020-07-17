@@ -1,12 +1,13 @@
 from rest_framework import serializers
 
-from musicapp.serializers import ArtistSerializer
+from musicapp.serializers import ArtistSerializer, FileSerializer
 from .models import Product
 
 
 class ProductSerializer(serializers.ModelSerializer):
     """Сериализация продукта"""
     artist = ArtistSerializer()
+    image = FileSerializer(many=True)
 
     class Meta:
         model = Product

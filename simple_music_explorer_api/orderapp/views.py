@@ -38,17 +38,22 @@ def create_orders(request, address_id):
             prod_album = obj
             artist_name = item.album.artist.name
 
-        serializer = ProductOrAlbumToOrderSerializer([obj], many=True)
-        prod_fields = serializer.data[0]
-        prod_fields.pop('id')
+        prod_fields = dict()
         if artist_name:
             prod_fields['artist'] = artist_name
-
+            prod_fields['genre'] = obj.genre
+        else:
+            prod_fields['category'] = obj.category.title
+            prod_fields['short_desc'] = obj.short_desc
+        prod_fields['title'] = obj.title
         fixed_product = ProductOrAlbumToOrder.objects.create(**prod_fields)
+        if not artist_name:
+            fixed_product.image.set(obj.image.all())
 
         if tracks:
             for track in tracks:
                 PurchasedTrack.objects.create(album=fixed_product,
+                                              title=track.title,
                                               audio_file=track.audio_file.url,
                                               order=track.order)
 
@@ -56,31 +61,26 @@ def create_orders(request, address_id):
                                                 owner=owner,
                                                 payment_state='NP',
                                                 delivery_address=address)
-
         order.total_sum = order.total_sum + float(price * quantity)
         order.save()
 
         if order not in order_list:
             order_list.append(order)
-        order_item_dict = model_to_dict(item)
+
+        order_item_dict = dict()
         order_item_dict['order'] = order
         order_item_dict['fixed_product'] = fixed_product
         order_item_dict['merch'] = prod_merch
         order_item_dict['album'] = prod_album
-
-        order_item_serializer = OrderItemSerializer([order_item_dict], many=True)
-        order_item = order_item_serializer.data[0]
-        order_item.pop('id')
-        order_item['order'] = order
-        order_item['fixed_product'] = fixed_product
-        order_item['merch'] = prod_merch
-        order_item['album'] = prod_album
-        OrderItem.objects.create(**order_item)
+        order_item_dict['type_product'] = item.type_product
+        order_item_dict['price'] = price
+        order_item_dict['quantity'] = quantity
+        OrderItem.objects.create(**order_item_dict)
 
     basket.delete()
 
 
-class NeedAnAddress(APIView):
+class AddressView(APIView):
     permission_classes = [permissions.IsAuthenticated, ]
 
     def get(self, request):
@@ -89,17 +89,11 @@ class NeedAnAddress(APIView):
         for item in basket:
             if item.merch:
                 need_an_address = True
+        if need_an_address:
+            address = Address.objects.filter(user=request.user)
+            serializer = AddressSerializer(address, many=True)
+            return Response(data={'address': serializer.data})
         return Response(data={'need_an_address': need_an_address})
-
-
-class AddressView(APIView):
-    permission_classes = [permissions.IsAuthenticated, ]
-
-    def get(self, request):
-
-        address = Address.objects.filter(user=request.user)
-        serializer = AddressSerializer(address, many=True)
-        return Response(serializer.data)
 
     def post(self, request):
 
