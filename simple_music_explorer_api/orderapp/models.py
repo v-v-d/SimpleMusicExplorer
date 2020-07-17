@@ -5,7 +5,7 @@ from django.db.models import F, Sum
 from authapp.models import User
 from coreapp.models import Core
 from merchapp.models import Product
-from musicapp.models import ArtistModel, AlbumModel
+from musicapp.models import ArtistModel, AlbumModel, FileModel
 
 
 class Address(Core):
@@ -36,7 +36,7 @@ class ProductOrAlbumToOrder(Core):
 
     artist = models.CharField(max_length=100, blank=True, null=True)
     category = models.CharField(max_length=100, blank=True, null=True)
-    image = models.CharField(max_length=500, blank=True, null=True)
+    image = models.ManyToManyField(FileModel, blank=True, null=True)
     short_desc = models.CharField(max_length=60, blank=True, null=True)
 
     genre = models.CharField(max_length=32, blank=True, null=True)

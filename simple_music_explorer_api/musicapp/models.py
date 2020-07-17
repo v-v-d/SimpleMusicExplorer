@@ -5,7 +5,8 @@ from coreapp.models import Core
 
 
 class FileModel(models.Model):
-    file = models.FileField(blank=False, null=False, upload_to='images/albumart')
+    file = models.FileField(blank=False, null=False, upload_to='images')
+    default = models.BooleanField(default=False)
 
     def __str__(self):
         return self.file.name
