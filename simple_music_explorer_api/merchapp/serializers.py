@@ -1,7 +1,7 @@
 from rest_framework import serializers
 
 from musicapp.serializers import ArtistSerializer, FileSerializer
-from .models import Product
+from .models import Product, ProductCategory
 
 
 class ProductSerializer(serializers.ModelSerializer):
@@ -12,6 +12,14 @@ class ProductSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
         fields = ('id', 'title', 'description', 'artist', 'category', 'image', 'short_desc', 'price')
+
+
+class CategoryListViewSerializer(serializers.ModelSerializer):
+    """Сериализация категории"""
+
+    class Meta:
+        model = ProductCategory
+        fields = ('id', 'title', 'description')
 
 
 class ProductCreateSerializer(serializers.ModelSerializer):
@@ -26,3 +34,5 @@ class ProductCreateSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         product, _ = Product.objects.update_or_create(**validated_data)
         return product
+
+

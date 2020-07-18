@@ -20,7 +20,7 @@ class Product(Core):
         verbose_name_plural = 'Продукты'
 
     category = models.ForeignKey(ProductCategory, on_delete=models.CASCADE)
-    artist = models.ForeignKey(ArtistModel, on_delete=models.CASCADE)
+    artist = models.ForeignKey(ArtistModel, null=True, on_delete=models.CASCADE)
     image = models.ManyToManyField(FileModel)
     short_desc = models.CharField(verbose_name='Product short description', max_length=60, blank=True)
     price = models.DecimalField(verbose_name='Product price', max_digits=8, decimal_places=2, default=0)

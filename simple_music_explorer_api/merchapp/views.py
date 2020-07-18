@@ -4,11 +4,22 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from musicapp.permissions import IsOwnerOrReadOnly
-from .models import Product
-from .serializers import ProductSerializer, ProductCreateSerializer
+from .models import Product, ProductCategory
+from .serializers import ProductSerializer, ProductCreateSerializer, CategoryListViewSerializer
 
 
 # Create your views here.
+
+class CategoryListView(APIView):
+    """
+    list all categories
+    """
+    # permission_classes = [permissions.IsAuthenticated, ]
+
+    def get(self, request):
+        categories = ProductCategory.objects.all()
+        serializer = CategoryListViewSerializer(categories, many=True)
+        return Response(serializer.data)
 
 
 class CategoryProductListView(APIView):
