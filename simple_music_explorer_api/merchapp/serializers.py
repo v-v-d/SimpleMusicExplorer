@@ -6,8 +6,10 @@ from .models import Product, ProductCategory
 
 class ProductSerializer(serializers.ModelSerializer):
     """Сериализация продукта"""
-    artist = ArtistSerializer()
+    artist = ArtistSerializer(read_only=True)
     image = FileSerializer(many=True)
+    category = serializers.SlugRelatedField(slug_field='title', read_only=True)
+
 
     class Meta:
         model = Product
@@ -16,6 +18,8 @@ class ProductSerializer(serializers.ModelSerializer):
 
 class CategoryListViewSerializer(serializers.ModelSerializer):
     """Сериализация категории"""
+    title = serializers.CharField(max_length=100, required=True)
+
 
     class Meta:
         model = ProductCategory
@@ -25,7 +29,7 @@ class CategoryListViewSerializer(serializers.ModelSerializer):
 class ProductCreateSerializer(serializers.ModelSerializer):
     """Сериализация создание продукта"""
     title = serializers.CharField(max_length=100, required=True)
-    category = serializers.SlugRelatedField(slug_field='name', read_only=True)
+    category = serializers.SlugRelatedField(slug_field='title', read_only=True)
 
     class Meta:
         model = Product

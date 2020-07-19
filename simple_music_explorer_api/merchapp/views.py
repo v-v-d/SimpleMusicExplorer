@@ -12,7 +12,7 @@ from .serializers import ProductSerializer, ProductCreateSerializer, CategoryLis
 
 class CategoryListView(APIView):
     """
-    list all categories
+    Все категории
     """
     # permission_classes = [permissions.IsAuthenticated, ]
 
@@ -39,7 +39,7 @@ class ArtistProductView(APIView):
 
     def get(self, request):
         products = Product.objects.filter(artist__user=request.user)
-        serializer =ProductSerializer(products, many=True)
+        serializer = ProductSerializer(products, many=True)
         return Response(serializer.data)
 
     def post(self, request):
@@ -52,6 +52,7 @@ class ArtistProductView(APIView):
 
 class ProductDetailView(APIView):
     permission_classes = [permissions.IsAuthenticated, IsOwnerOrReadOnly]
+    # permission_classes = [permissions.AllowAny]
 
     def get(self, request, pk):
         product = get_object_or_404(Product, id=pk)
