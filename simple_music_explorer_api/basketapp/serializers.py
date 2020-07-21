@@ -13,7 +13,7 @@ class BasketSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = BasketModel
-        fields = ('id', 'owner', 'album', 'merch', 'price', 'quantity')
+        fields = ('id', 'owner', 'album', 'merch', 'type_product', 'price', 'quantity')
 
 
 class BasketCreateSerializer(serializers.ModelSerializer):

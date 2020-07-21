@@ -2,8 +2,9 @@ from rest_framework.response import Response
 from rest_framework import permissions
 from rest_framework.views import APIView
 
+from authapp.serializers import UserSerializer
 from orderapp.models import OrderItem
-from orderapp.serializers import OrderItemSerializer
+from orderapp.serializers import OrderItemSerializer, OrderSerializer
 
 
 class IsArtistOwnerOrReadOnly(permissions.BasePermission):
@@ -13,7 +14,7 @@ class IsArtistOwnerOrReadOnly(permissions.BasePermission):
 
     def has_object_permission(self, request, view, obj):
 
-        return obj.artist.user == request.user
+        return obj.order.artist.user == request.user
 
 
 class OrderMerchView(APIView):
@@ -21,8 +22,11 @@ class OrderMerchView(APIView):
     permission_classes = [permissions.IsAuthenticated, IsArtistOwnerOrReadOnly]
 
     def get(self, request, pk):
-        order_merch = OrderItem.objects.filter(artist__id=pk, album_product=None)
+        order_merch = OrderItem.objects.filter(order__artist_id=pk,
+                                               type_product='m',
+                                               order__payment_state='P')
         serializer = OrderItemSerializer(order_merch, many=True)
+
         return Response(serializer.data)
 
 
@@ -31,8 +35,11 @@ class OrderMusicView(APIView):
     permission_classes = [permissions.IsAuthenticated, IsArtistOwnerOrReadOnly]
 
     def get(self, request, pk):
-        order_music = OrderItem.objects.filter(artist__id=pk, merch_product=None)
+        order_music = OrderItem.objects.filter(order__artist_id=pk,
+                                               type_product='t',
+                                               order__payment_state='P')
         serializer = OrderItemSerializer(order_music, many=True)
+
         return Response(serializer.data)
 
 

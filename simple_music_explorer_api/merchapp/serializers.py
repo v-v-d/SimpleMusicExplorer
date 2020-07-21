@@ -1,16 +1,17 @@
 from rest_framework import serializers
 
-from musicapp.serializers import ArtistSerializer
+from musicapp.serializers import ArtistSerializer, FileSerializer
 from .models import Product
 
 
 class ProductSerializer(serializers.ModelSerializer):
     """Сериализация продукта"""
-    seller = ArtistSerializer()
+    artist = ArtistSerializer()
+    image = FileSerializer(many=True)
 
     class Meta:
         model = Product
-        fields = ('id', 'title', 'description', 'seller', 'category', 'image', 'short_desc', 'price')
+        fields = ('id', 'title', 'description', 'artist', 'category', 'image', 'short_desc', 'price')
 
 
 class ProductCreateSerializer(serializers.ModelSerializer):
