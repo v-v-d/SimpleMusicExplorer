@@ -36,7 +36,7 @@ class ProductOrAlbumToOrder(Core):
 
     artist = models.CharField(max_length=100, blank=True, null=True)
     category = models.CharField(max_length=100, blank=True, null=True)
-    image = models.ManyToManyField(FileModel, blank=True, null=True)
+    image = models.ManyToManyField(FileModel, blank=True)
     short_desc = models.CharField(max_length=60, blank=True, null=True)
 
     genre = models.CharField(max_length=32, blank=True, null=True)

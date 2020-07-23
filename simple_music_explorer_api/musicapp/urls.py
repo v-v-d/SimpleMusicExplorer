@@ -8,7 +8,7 @@ urlpatterns = [
     path('albums/<int:pk>/tracks/', views.TrackListView.as_view(), name='tracks'),
 
     path('artists/', views.ArtistListView.as_view(), name='artists_all'),
-    path('user-artists/', views.UserArtistView.as_view()),
+    path('user-artists/', views.UserArtistView.as_view(), name='user-artists'),
     path('artists/<int:pk>/', views.ArtistDetail.as_view(), name='artist_detail'),
     path('artists/<int:pk>/albums/', views.AlbumListView.as_view(), name='artist_albums'),
 
