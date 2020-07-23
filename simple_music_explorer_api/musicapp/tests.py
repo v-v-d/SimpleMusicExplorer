@@ -13,17 +13,15 @@ class Artist(TestCore):
         url = reverse('user-artists')
 
         data = {
-            'id': 1,
-            'user': user,
+            'user': user.id,
             'name': fake.company(),
             'location': fake.address(),
             'bio': fake.text(),
             'website': fake.domain_name()
         }
 
-        request = self.client.post(url, data)
+        request = self.client.post(url, data, format='json')
         self.assertEqual(request.status_code, status.HTTP_201_CREATED)
-        print('1')
 
 
 class GetAlbums(TestCore):
