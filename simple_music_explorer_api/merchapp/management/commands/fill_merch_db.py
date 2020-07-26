@@ -11,13 +11,14 @@ fake = Faker()
 
 
 def fill_users(qty):
+
     for _ in range(qty):
         while True:
             try:
                 User.objects.create_user(
                     username=fake.first_name(),
-                    email=fake.email(),
-                    password=fake.password()
+                    email=fake.free_email(),
+                    password=fake.password(length=15, special_chars=True)
                 )
                 break
             except IntegrityError:

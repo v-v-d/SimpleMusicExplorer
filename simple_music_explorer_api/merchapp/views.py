@@ -35,7 +35,7 @@ class CategoryProductListView(APIView):
 
 
 class ArtistProductView(APIView):
-    permission_classes = [permissions.IsAuthenticated, IsOwnerOrReadOnly]
+    # permission_classes = [permissions.IsAuthenticated, IsOwnerOrReadOnly]
 
     def get(self, request):
         products = Product.objects.filter(artist__user=request.user)
@@ -51,7 +51,7 @@ class ArtistProductView(APIView):
 
 
 class ProductDetailView(APIView):
-    permission_classes = [permissions.IsAuthenticated, IsOwnerOrReadOnly]
+    # permission_classes = [permissions.IsAuthenticated, IsOwnerOrReadOnly]
     # permission_classes = [permissions.AllowAny]
 
     def get(self, request, pk):
