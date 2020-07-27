@@ -32,7 +32,7 @@ class AlbumModel(Core):
 
     price = models.FloatField(default=0, null=False)
     genre = models.CharField(max_length=32)
-    artist = models.ForeignKey(ArtistModel, null=False, on_delete=models.CASCADE)
+    artist = models.ForeignKey(ArtistModel, null=True, on_delete=models.CASCADE)
     cover = models.ManyToManyField(FileModel, blank=True)
 
     def __str__(self):

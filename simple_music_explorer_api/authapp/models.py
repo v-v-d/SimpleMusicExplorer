@@ -3,7 +3,7 @@ from django.contrib.auth.models import AbstractUser
 
 
 class User(AbstractUser):
-    email = models.EmailField(blank=False, unique=True)
+    email = models.EmailField(blank=False)
     is_artist = models.BooleanField(default=False)
 
     REQUIRED_FIELDS = ['email']
