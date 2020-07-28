@@ -47,10 +47,23 @@ class ArtistSerializer(serializers.ModelSerializer):
 
 class ArtistCreateSerializer(serializers.ModelSerializer):
     """Сериализация автиста"""
+    logo = serializers.PrimaryKeyRelatedField(queryset=FileModel.objects.all(), write_only=True, many=True,
+                                              required=False)
 
     class Meta:
         model = ArtistModel
         fields = ('name', 'location', 'bio', 'website', 'logo')
+
+    def update(self, instance, validated_data):
+        logo = validated_data.pop('logo', None)
+        instance = super().update(instance, validated_data)
+
+        if logo is not None:
+            for logo in logo:
+                instance.logo.add(logo)
+            instance.save()
+
+        return instance
 
     def create(self, validated_data):
         artist, _ = ArtistModel.objects.update_or_create(**validated_data)

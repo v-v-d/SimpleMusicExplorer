@@ -29,3 +29,19 @@ class TestCore(APITestCase):
 
         self.client.force_authenticate(user=user, token=user.auth_token)
         return user
+
+    def create_artist(self, user):
+        fake = Faker()
+        url = reverse('user-artists')
+
+        data = {
+            'user': user.id,
+            'name': fake.company(),
+            'location': fake.address(),
+            'bio': fake.text(),
+            'website': fake.domain_name()
+        }
+
+        artist = self.client.post(url, data, format='json')
+
+        return data

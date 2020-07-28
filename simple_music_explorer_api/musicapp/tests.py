@@ -7,7 +7,7 @@ from rest_framework import status
 from simple_music_explorer_api.test_core import TestCore
 
 
-class Artist(TestCore):
+class UserArtist(TestCore):
     def test_create_retrieve_artist(self):
         # creating fake artist
         fake = Faker()
@@ -32,6 +32,24 @@ class Artist(TestCore):
 
         self.assertEqual(request.status_code, status.HTTP_200_OK)
         self.assertEqual(data['user'], result['user']['id'])
+
+
+class Artist(TestCore):
+    def test_retrieve_update_artist(self):
+        fake = Faker()
+        user = self.create_and_auth_user()
+        self.create_artist(user)
+
+        url = reverse('user-artists')
+        artist = self.client.get(url)
+
+        url = reverse('artist_detail', args=[artist.data[0]['id']])
+        request = self.client.get(url)
+        self.assertEqual(artist.data[0], request.data)
+
+        # update artist
+        request = self.client.put(url, data={'name': 'test'})
+        self.assertEqual(request.status_code, status.HTTP_201_CREATED)
 
 
 class GetAlbums(TestCore):
