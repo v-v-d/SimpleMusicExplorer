@@ -1,4 +1,5 @@
 import json
+import random
 
 from django.urls import reverse
 from faker import Faker
@@ -36,7 +37,6 @@ class UserArtist(TestCore):
 
 class Artist(TestCore):
     def test_retrieve_update_artist(self):
-        fake = Faker()
         user = self.create_and_auth_user()
         self.create_artist(user)
 
@@ -50,6 +50,117 @@ class Artist(TestCore):
         # update artist
         request = self.client.put(url, data={'name': 'test'})
         self.assertEqual(request.status_code, status.HTTP_201_CREATED)
+
+
+class Albums(TestCore):
+    def test_create_album(self):
+        fake = Faker()
+        user = self.create_and_auth_user()
+        self.create_artist(user)
+        url = reverse('user-artists')
+        artist = self.client.get(url)
+
+        url = reverse('artist_albums', args=[artist.data[0]['id']])
+        data = {
+            'title': fake.first_name(),
+            'description': fake.text(),
+            'price': round(random.uniform(1, 100), 2),
+            'genre': fake.domain_name(),
+            'artist': artist.data[0]['id']
+        }
+
+        create_album = self.client.post(url, data)
+        self.assertEqual(create_album.status_code, status.HTTP_201_CREATED)
+
+    def test_get_album(self):
+        fake = Faker()
+        user = self.create_and_auth_user()
+        self.create_artist(user)
+        url = reverse('user-artists')
+        artist = self.client.get(url)
+
+        url = reverse('artist_albums', args=[artist.data[0]['id']])
+        data = {
+            'title': fake.first_name(),
+            'description': fake.text(),
+            'price': round(random.uniform(1, 100), 2),
+            'genre': fake.domain_name(),
+            'artist': artist.data[0]['id']
+        }
+
+        create_album = self.client.post(url, data)
+
+        get_album = self.client.get(url)
+        self.assertEqual(create_album.data, get_album.data[0])
+
+    def test_put_album(self):
+        fake = Faker()
+        user = self.create_and_auth_user()
+        self.create_artist(user)
+        url = reverse('user-artists')
+        artist = self.client.get(url)
+
+        url = reverse('artist_albums', args=[artist.data[0]['id']])
+        data = {
+            'title': fake.first_name(),
+            'description': fake.text(),
+            'price': round(random.uniform(1, 100), 2),
+            'genre': fake.domain_name(),
+            'artist': artist.data[0]['id']
+        }
+
+        create_album = self.client.post(url, data)
+
+        url = reverse('artist_albums', args=[artist.data[0]['id']])
+        request = self.client.put(url, data={'name': 'test'})
+        # self.assertEqual(request.status_code, status.HTTP_201_CREATED)
+        print(1)
+
+    def test_delete_album(self):
+        fake = Faker()
+        user = self.create_and_auth_user()
+        self.create_artist(user)
+        url = reverse('user-artists')
+        artist = self.client.get(url)
+
+        url = reverse('artist_albums', args=[artist.data[0]['id']])
+        data = {
+            'title': fake.first_name(),
+            'description': fake.text(),
+            'price': round(random.uniform(1, 100), 2),
+            'genre': fake.domain_name(),
+            'artist': artist.data[0]['id']
+        }
+
+        create_album = self.client.post(url, data)
+
+        url = reverse('artist_albums', args=[create_album.data['id']])
+        request = self.client.delete(url)
+        self.assertEqual(request.status_code, status.HTTP_204_NO_CONTENT)
+
+    def test_patch_album(self):
+        fake = Faker()
+        user = self.create_and_auth_user()
+        self.create_artist(user)
+        url = reverse('user-artists')
+        artist = self.client.get(url)
+
+        url = reverse('artist_albums', args=[artist.data[0]['id']])
+        data = {
+            'title': fake.first_name(),
+            'description': fake.text(),
+            'price': round(random.uniform(1, 100), 2),
+            'genre': fake.domain_name(),
+            'artist': artist.data[0]['id']
+        }
+
+        create_album = self.client.post(url, data)
+
+        url = reverse('artist_albums', args=[artist.data[0]['id']])
+        request = self.client.put(url, data={'name': 'test'})
+        self.assertEqual(request.status_code, status.HTTP_201_CREATED)
+
+
 
 
 class GetAlbums(TestCore):
