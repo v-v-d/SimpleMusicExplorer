@@ -30,7 +30,7 @@ class AlbumModel(Core):
             models.CheckConstraint(check=models.Q(price__gte=0), name='price_gte_0'),
         ]
 
-    price = models.FloatField(default=0, null=False)
+    price = models.DecimalField(max_digits=8, decimal_places=2, default=0, null=False)
     genre = models.CharField(max_length=32)
     artist = models.ForeignKey(ArtistModel, null=False, on_delete=models.CASCADE)
     cover = models.ManyToManyField(FileModel, blank=True)

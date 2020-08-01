@@ -70,8 +70,6 @@ class AlbumsListView(APIView):
     """
     list all albums
     """
-    # permission_classes = [permissions.IsAuthenticated, ]
-
     def get(self, request):
         albums = AlbumModel.objects.all()
         serializer = AlbumSerializer(albums, many=True)
