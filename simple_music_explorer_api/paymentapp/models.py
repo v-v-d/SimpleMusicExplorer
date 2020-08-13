@@ -1,12 +1,12 @@
 from django.db import models
 
 from coreapp.models import Core
-from musicapp.models import ArtistModel
+from musicapp.models import Artist
 from orderapp.models import OrderItem
 
 
 class BillingInformation(Core):
-    seller = models.ForeignKey(ArtistModel, on_delete=models.CASCADE)
+    seller = models.ForeignKey(Artist, on_delete=models.CASCADE)
     default = models.BooleanField(default=False)
 
     client_id = models.CharField(max_length=100)

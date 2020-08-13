@@ -7,7 +7,7 @@ from rest_framework import permissions
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from orderapp.models import Orders
+from orderapp.models import UserOrder
 from orderapp.serializers import OrderSerializer
 from paymentapp.models import BillingInformation
 
@@ -16,7 +16,8 @@ def checkout_orders(order, token):
     serializers = OrderSerializer(order, many=True)
     headers = {
         "Content-Type": "application/json",
-        "Authorization": 'Bearer' + token}
+        "Authorization": 'Bearer' + token,
+    }
     url = 'https://api.sandbox.paypal.com/v2/checkout/orders'
     # тестовые данные
     data = {
@@ -70,15 +71,15 @@ class PaymentView(APIView):
 
     def post(self, request):
         order_id = request.data.get('order_id')
-        order = get_object_or_404(Orders, id=order_id, owner=request.user, payment_state='NP')
+        order = get_object_or_404(UserOrder, id=order_id, owner=request.user, payment_state='NP')
 
         billing = BillingInformation(seller=order.artist)
         client_id = billing.client_id
         client_secret = billing.client_secret
         token = paypal_token(client_id, client_secret)
 
-        respons = checkout_orders(order, token).json()
-        return Response(respons)
+        response = checkout_orders(order, token).json()
+        return Response(response)
 
 
 class PaymentDoneView(APIView):
