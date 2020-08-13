@@ -9,3 +9,4 @@ simple_music_explorer_api/conf
 
 migrations/
 tmp/
+media/
