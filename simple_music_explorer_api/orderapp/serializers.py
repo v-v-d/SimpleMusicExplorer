@@ -3,7 +3,7 @@ from rest_framework import serializers
 from authapp.serializers import UserSerializer
 from merchapp.serializers import ProductSerializer
 from musicapp.serializers import ArtistSerializer, AlbumSerializer, FileSerializer
-from .models import OrderItem, Address, Orders, ProductOrAlbumToOrder, PurchasedTrack
+from .models import OrderItem, Address, UserOrder, FrozenOrderItem, FrozenTrack
 
 
 class AddressSerializer(serializers.ModelSerializer):
@@ -27,10 +27,10 @@ class AddressCreateSerializer(serializers.ModelSerializer):
 
 
 class PurchasedTrackSerializer(serializers.ModelSerializer):
-    album = serializers.PrimaryKeyRelatedField(queryset=ProductOrAlbumToOrder.objects.all())
+    album = serializers.PrimaryKeyRelatedField(queryset=FrozenOrderItem.objects.all())
 
     class Meta:
-        model = PurchasedTrack
+        model = FrozenTrack
         fields = ('id', 'title', 'album', 'order', 'audio_file')
 
 
@@ -39,7 +39,7 @@ class ProductOrAlbumToOrderSerializer(serializers.ModelSerializer):
     image = FileSerializer(many=True)
 
     class Meta:
-        model = ProductOrAlbumToOrder
+        model = FrozenOrderItem
         fields = ('id', 'title', 'artist', 'category', 'image', 'short_desc', 'prod_tracks')
 
 
@@ -47,7 +47,7 @@ class OrderOwnerSerializer(serializers.ModelSerializer):
     owner = UserSerializer()
 
     class Meta:
-        model = Orders
+        model = UserOrder
         fields = ('owner', )
 
 
@@ -68,5 +68,5 @@ class OrderSerializer(serializers.ModelSerializer):
     order_items = OrderItemSerializer(many=True, read_only=True)
 
     class Meta:
-        model = Orders
+        model = UserOrder
         fields = ('id', 'total_sum', 'artist', 'owner', 'delivery_address', 'payment_state', 'order_items')
