@@ -1,3 +1,6 @@
+from django.conf import settings
+from django.contrib.contenttypes.fields import GenericForeignKey
+from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils.functional import cached_property
@@ -5,38 +8,33 @@ from django.utils.functional import cached_property
 from authapp.models import User
 from coreapp.models import Core
 from merchapp.models import Product
-from musicapp.models import AlbumModel
+from musicapp.models import ArtistAlbum
 
 
 class BasketModel(Core):
-    owner = models.ForeignKey(User, on_delete=models.CASCADE)
-    album = models.ForeignKey(AlbumModel, blank=True, null=True, on_delete=models.CASCADE)
-    merch = models.ForeignKey(Product, blank=True, null=True, on_delete=models.CASCADE)
-    type_product = models.CharField(max_length=1, choices=[('m', 'merch'), ('t', 'treck')], blank=True)
-    price = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    allowed_object_types = (Product, ArtistAlbum)
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
+    object_id = models.PositiveIntegerField()
+    content_object = GenericForeignKey('content_type', 'object_id')
+
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='basket')
     quantity = models.IntegerField(blank=False, default=1)
 
+    def get_current_item(self):
+        return self.content_object
+
     def __str__(self):
-        if self.type_product == 'm':
-            return f'{self.owner}-{self.merch.title}'
-        else:
-            return f'{self.owner}-{self.album.title}'
+        item = self.get_current_item()
+        return f'{self.owner}-{item.title}'
 
     def save(self, *args, **kwargs):
-        if self.merch:
-            self.type_product = 'm'
-            self.price = self.merch.price
+        if isinstance(self.content_object, self.allowed_object_types):
+            super().save(*args, **kwargs)
         else:
-            self.type_product = 't'
-            self.price = self.album.price
-
-        super().save(*args, **kwargs)
-
-    def clean(self):
-        if self.album and self.merch:
-            raise ValidationError('Только одно из полей (album, merch) должно быть заполнено')
-        if self.album is None and self.merch is None:
-            raise ValidationError('Одно поле должно быть заполнено обязательно, album или merch')
+            raise ValidationError(
+                f'Wrong object type. '
+                f'Expected {self.allowed_object_types}, got {type(self.content_object)}.'
+            )
 
     @cached_property
     def get_items_cached(self):
@@ -44,7 +42,8 @@ class BasketModel(Core):
 
     @property
     def get_product_total_price(self):
-        return self.quantity * self.price
+        item = self.get_current_item()
+        return self.quantity * item.price
 
     @property
     def get_products_total_quantity_by_user(self):
