@@ -14,7 +14,7 @@ class IsArtistOwnerOrReadOnly(permissions.BasePermission):
 
     def has_object_permission(self, request, view, obj):
 
-        return obj.order.artist.user == request.user
+        return obj.ordering.artist.user == request.user
 
 
 class OrderMerchView(APIView):

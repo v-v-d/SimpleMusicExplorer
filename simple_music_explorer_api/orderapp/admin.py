@@ -1,10 +1,10 @@
 from django.contrib import admin
 
-from .models import Orders, OrderItem, Address, ProductOrAlbumToOrder, PurchasedTrack
+from orderapp.models import UserOrder, OrderItem, Address, FrozenOrderItem, FrozenTrack
 
 admin.site.register(OrderItem)
-admin.site.register(Orders)
+admin.site.register(UserOrder)
 admin.site.register(Address)
-admin.site.register(ProductOrAlbumToOrder)
-admin.site.register(PurchasedTrack)
+admin.site.register(FrozenOrderItem)
+admin.site.register(FrozenTrack)
 

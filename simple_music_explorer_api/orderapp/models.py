@@ -1,15 +1,15 @@
+from django.contrib.contenttypes.fields import GenericForeignKey
+from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
 from django.db import models
-from django.db.models import F, Sum
 
 from authapp.models import User
-from coreapp.models import Core
+from coreapp.models import Core, FileModel
 from merchapp.models import Product
-from musicapp.models import ArtistModel, AlbumModel, FileModel
+from musicapp.models import Artist, ArtistAlbum, AlbumTrack
 
 
 class Address(Core):
-
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     first_name = models.CharField(max_length=25)
     last_name = models.CharField(max_length=25)
@@ -22,108 +22,107 @@ class Address(Core):
 
 
 class ActiveQuerySetManager(models.QuerySet):
-
     def active(self):
-        return self.filter(active=True)
+        return self.filter(is_active=True)
 
     def get_queryset(self):
-        return super().get_queryset().active()
+        return super().get_queryset().is_active()
 
 
-class ProductOrAlbumToOrder(Core):
-    # owner = models.ForeignKey(User, on_delete=models.CASCADE)
-    # artist = models.CharField(max_length=100)
-
-    artist = models.CharField(max_length=100, blank=True, null=True)
-    category = models.CharField(max_length=100, blank=True, null=True)
-    image = models.ManyToManyField(FileModel, blank=True, null=True)
-    short_desc = models.CharField(max_length=60, blank=True, null=True)
-
-    genre = models.CharField(max_length=32, blank=True, null=True)
+class FrozenOrderItem(Core):
+    item_type = models.CharField(max_length=100, blank=False)
+    order_number = models.PositiveIntegerField(null=False)
+    artist_name = models.CharField(max_length=100, blank=False)
+    image = models.ManyToManyField(FileModel, blank=True)
+    price = models.DecimalField(max_digits=8, decimal_places=2, null=False)
 
     objects = ActiveQuerySetManager.as_manager()
 
 
-class PurchasedTrack(Core):
-
-    album = models.ForeignKey(ProductOrAlbumToOrder, related_name='prod_tracks', null=False, on_delete=models.CASCADE)
-    audio_file = models.CharField(max_length=200)
-    order = models.SmallIntegerField()
+class FrozenTrack(Core):
+    frozen_album = models.ForeignKey(
+        FrozenOrderItem, related_name='frozen_tracks', null=False,
+        blank=False, on_delete=models.CASCADE
+    )
+    audio_file = models.ManyToManyField(FileModel, blank=False)
 
     objects = ActiveQuerySetManager.as_manager()
 
 
 class OrderManager(models.QuerySet):
-
     def delete(self, **kwargs):
         for obj in self:
             if obj.payment_state != 'P':
                 return super().delete()
             else:
-                obj.active = False
+                obj.is_active = False
                 obj.save()
 
 
-class Orders(Core):
-    """Заказ"""
+class UserOrder(Core):
+    """Order"""
 
-    artist = models.ForeignKey(ArtistModel, on_delete=models.SET_NULL, null=True)
+    artist = models.ForeignKey(Artist, on_delete=models.SET_NULL, null=True)
     owner = models.ForeignKey(User, related_name='orders', on_delete=models.SET_NULL, null=True)
     delivery_address = models.ForeignKey(Address, blank=True, null=True, on_delete=models.SET_NULL)
     payment_state = models.CharField(max_length=2, choices=[('NP', 'Not paid '), ('P', 'Paid')])
-    total_sum = models.FloatField(default=0)
+    delivery_status = models.CharField(
+        max_length=2, default='P',
+        choices=[('P', 'Processing'), ('C', 'Canceled '), ('S', 'Sent'), ('R', 'Received')]
+    )
 
     objects = OrderManager.as_manager()
 
     def __str__(self):
         return f'{self.date}'
 
-    def get_total_summ(self):
-        return sum(item.get_summ() for item in self.order_items.all())
+    @property
+    def total_cost(self):
+        return sum(item.get_sum() for item in self.order_items.all())
 
 
 class OrderItemManager(models.QuerySet):
-
     def delete(self, **kwargs):
         for obj in self:
             if obj.order.payment_state != 'P':
                 return super().delete()
+            else:
+                raise ValidationError('Can\'t delete a paid order item.')
 
 
 class OrderItem(Core):
-    """Товар в заказе"""
-    order = models.ForeignKey(Orders, null=False, on_delete=models.CASCADE, related_name='order_items')
-    # owner = models.ForeignKey(User, related_name='owner_item', on_delete=models.SET_NULL, null=True) ?
-    merch = models.ForeignKey(Product, on_delete=models.SET_NULL, blank=True, null=True)
-    album = models.ForeignKey(AlbumModel, on_delete=models.SET_NULL, blank=True, null=True)
-    type_product = models.CharField(max_length=1, choices=[('m', 'merch'), ('t', 'treck')], blank=True)
+    """Item in order"""
 
-    fixed_product = models.ForeignKey(ProductOrAlbumToOrder, on_delete=models.SET_NULL, blank=True, null=True, related_name='fixed')
+    order = models.ForeignKey(
+        UserOrder, null=False, blank=True, on_delete=models.CASCADE,
+        related_name='order_items'
+    )
 
-    price = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-    quantity = models.PositiveIntegerField(default=0, null=False, blank=True)
-    delivery_status = models.CharField(max_length=2, choices=[('P', 'Processing'), ('C', 'Canceled '), ('S', 'Sent'), ('R', 'Received')], default='P')
+    allowed_object_types = (Product, ArtistAlbum)
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
+    object_id = models.PositiveIntegerField()
+    content_object = GenericForeignKey('content_type', 'object_id')
+
+    quantity = models.PositiveIntegerField(default=0)
+    frozen_order_item = models.ForeignKey(
+        FrozenOrderItem, on_delete=models.SET_NULL,
+        blank=True, null=True, related_name='frozen'
+    )
 
     objects = OrderItemManager.as_manager()
 
     def save(self, *args, **kwargs):
-        if self.merch:
-            self.type_product = 'm'
+        if isinstance(self.content_object, self.allowed_object_types):
+            super().save(*args, **kwargs)
         else:
-            self.type_product = 't'
+            raise ValidationError(
+                f'Wrong object type. '
+                f'Expected {self.allowed_object_types}, got {type(self.content_object)}.'
+            )
 
-        super().save(*args, **kwargs)
+    @property
+    def total_cost(self):
+        return self.content_object.price * self.quantity
 
     def __str__(self):
-        return f'{self.id}-{self.order.id}'
-
-    def clean(self):
-        if not self.album and not self.merch:
-            super(OrderItem, self).delete()
-        if self.album and self.merch:
-            raise ValidationError('Только одно из полей (album_product, merch_product) должно быть заполнено')
-        if self.album is None and self.merch is None:
-            raise ValidationError('Одно поле должно быть заполнено обязательно, album_product или merch_product')
-
-    def get_summ(self):
-        return (self.price or 0) * (self.quantity or 0)
+        return f'{type(self.content_object).__name__}-{self.content_object.title} in order {self.order.id}'

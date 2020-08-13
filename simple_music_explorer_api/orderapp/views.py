@@ -5,16 +5,16 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from basketapp.models import BasketModel
-from musicapp.models import TrackModel
-from orderapp.models import Address, Orders, ProductOrAlbumToOrder, OrderItem, PurchasedTrack
+from musicapp.models import AlbumTrack
+from orderapp.models import Address, UserOrder, FrozenOrderItem, OrderItem, FrozenTrack
 from orderapp.serializers import AddressSerializer, AddressCreateSerializer, ProductOrAlbumToOrderSerializer, \
     OrderItemSerializer, OrderSerializer
 
 
-def create_orders(request, address_id):
+def create_orders(request, address_id=None):
     owner = request.user
     basket = BasketModel.objects.filter(owner=owner)
-    order_list = list()
+    order_list = []
     address = None
     if address_id:
         address = get_object_or_404(Address, id=address_id)
@@ -34,7 +34,7 @@ def create_orders(request, address_id):
         else:
             artist = item.album.artist
             obj = item.album
-            tracks = TrackModel.objects.filter(album=obj)
+            tracks = AlbumTrack.objects.filter(album=obj)
             prod_album = obj
             artist_name = item.album.artist.name
 
@@ -46,21 +46,21 @@ def create_orders(request, address_id):
             prod_fields['category'] = obj.category.title
             prod_fields['short_desc'] = obj.short_desc
         prod_fields['title'] = obj.title
-        fixed_product = ProductOrAlbumToOrder.objects.create(**prod_fields)
+        fixed_product = FrozenOrderItem.objects.create(**prod_fields)
         if not artist_name:
             fixed_product.image.set(obj.image.all())
 
         if tracks:
             for track in tracks:
-                PurchasedTrack.objects.create(album=fixed_product,
-                                              title=track.title,
-                                              audio_file=track.audio_file.url,
-                                              order=track.order)
+                FrozenTrack.objects.create(album=fixed_product,
+                                           title=track.title,
+                                           audio_file=track.audio_file.url,
+                                           order=track.ordering)
 
-        order, _ = Orders.objects.get_or_create(artist=artist,
-                                                owner=owner,
-                                                payment_state='NP',
-                                                delivery_address=address)
+        order, _ = UserOrder.objects.get_or_create(artist=artist,
+                                                   owner=owner,
+                                                   payment_state='NP',
+                                                   delivery_address=address)
         order.total_sum = order.total_sum + float(price * quantity)
         order.save()
 
@@ -110,7 +110,7 @@ class InvoiceForPaymentView(APIView):
     permission_classes = [permissions.IsAuthenticated, ]
 
     def get(self, request):
-        orders = Orders.objects.filter(owner=request.user, payment_state='NP')
+        orders = UserOrder.objects.filter(owner=request.user, payment_state='NP')
         serializer = OrderSerializer(orders, many=True)
 
         return Response(serializer.data)
@@ -119,7 +119,7 @@ class InvoiceForPaymentView(APIView):
 
         address_id = request.data.get('address_id')
         create_orders(request, address_id)
-        orders = Orders.objects.filter(owner=request.user, payment_state='NP')
+        orders = UserOrder.objects.filter(owner=request.user, payment_state='NP')
         serializer = OrderSerializer(orders, many=True)
 
         return Response(serializer.data, status=status.HTTP_201_CREATED)

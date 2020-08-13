@@ -162,7 +162,8 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.BasicAuthentication',
         'rest_framework.authentication.SessionAuthentication',
     ),
-    'DEFAULT_SCHEMA_CLASS': 'rest_framework.schemas.openapi.AutoSchema'
+    'DEFAULT_SCHEMA_CLASS': 'rest_framework.schemas.openapi.AutoSchema',
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination'
 }
 
 TOKEN_LIFETIME = timedelta(days=1)
@@ -176,10 +177,11 @@ DJOSER = {
 }
 
 CORS_ORIGIN_WHITELIST = (
+    'http://127.0.0.1',
     'http://127.0.0.1:8080',
     'http://localhost:8080',
 )
 
-# paypal setings
+# paypal settings
 RETURN_URL = 'http://127.0.0.1:8080/payment/done/'
 CANCEL_URL = 'http://127.0.0.1:8080/payment/cancel/'

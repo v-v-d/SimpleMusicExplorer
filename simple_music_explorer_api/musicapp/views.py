@@ -1,24 +1,28 @@
 from rest_framework import status, permissions
-from rest_framework.generics import get_object_or_404
+from rest_framework.generics import get_object_or_404, ListAPIView
+from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.parsers import FileUploadParser
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from musicapp.models import AlbumModel, TrackModel, ArtistModel
+from musicapp.models import ArtistAlbum, AlbumTrack, Artist
 from musicapp.permissions import IsOwnerOrReadOnly, IsArtistOrReadOnly
-from musicapp.serializers import AlbumSerializer, TrackSerializer, FileSerializer, ArtistSerializer, \
+from musicapp.serializers import (
+    AlbumSerializer, TrackSerializer, FileSerializer, ArtistSerializer,
     ArtistCreateSerializer
+)
 
 
 class ArtistListView(APIView):
     """
     list all artists
     """
-    permission_classes = [permissions.IsAuthenticated, ]
+    permission_classes = []
+    # permission_classes = [permissions.IsAuthenticated, ]
 
     def get(self, request):
-        artists = ArtistModel.objects.all()
-        serializer = ArtistSerializer(artists, many=True)
+        artists = Artist.objects.all()
+        serializer = ArtistSerializer(artists, context={'request': request}, many=True)
         return Response(serializer.data)
 
 
@@ -29,8 +33,8 @@ class UserArtistView(APIView):
     permission_classes = [permissions.IsAuthenticated, IsArtistOrReadOnly]
 
     def get(self, request):
-        artist = ArtistModel.objects.filter(user=request.user)
-        serializer = ArtistSerializer(artist, many=True)
+        artist = Artist.objects.filter(user=request.user)
+        serializer = ArtistSerializer(artist, context={'request': request}, many=True)
         return Response(serializer.data)
 
     def post(self, request):
@@ -45,15 +49,16 @@ class ArtistDetail(APIView):
     """
     retrieve, update and delete artists
     """
-    permission_classes = [permissions.IsAuthenticated, IsArtistOrReadOnly]
+    permission_classes = [IsArtistOrReadOnly]
+    # permission_classes = [permissions.IsAuthenticated, IsArtistOrReadOnly]
 
     def get(self, request, pk):
-        artist = get_object_or_404(ArtistModel, id=pk)
-        serializer = ArtistSerializer(artist)
+        artist = get_object_or_404(Artist, id=pk)
+        serializer = ArtistSerializer(artist, context={'request': request})
         return Response(serializer.data)
 
     def put(self, request, pk):
-        artist_update = ArtistModel.objects.filter(id=pk)
+        artist_update = Artist.objects.filter(id=pk)
         serialize = ArtistCreateSerializer(data=request.data)
         if serialize.is_valid():
             artist_update.update(**serialize.validated_data)
@@ -61,32 +66,35 @@ class ArtistDetail(APIView):
         return Response(status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, pk):
-        artist_delete = ArtistModel.objects.filter(id=pk)
+        artist_delete = Artist.objects.filter(id=pk)
         artist_delete.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-class AlbumsListView(APIView):
+class AlbumsListView(ListAPIView):
     """
     list all albums
     """
-    permission_classes = [permissions.IsAuthenticated, ]
+    queryset = ArtistAlbum.objects.all()
+    pagination_class = LimitOffsetPagination
+    serializer_class = AlbumSerializer
 
-    def get(self, request):
-        albums = AlbumModel.objects.all()
-        serializer = AlbumSerializer(albums, many=True)
-        return Response(serializer.data)
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context.update({'request': self.request})
+        return context
 
 
 class AlbumListView(APIView):
     """
     list specific artist albums, or create a new one
     """
-    permission_classes = [permissions.IsAuthenticated, IsOwnerOrReadOnly]
+    # permission_classes = [permissions.IsAuthenticated, IsOwnerOrReadOnly]
+    permission_classes = [IsOwnerOrReadOnly]
 
     def get(self, request, pk):
-        albums = AlbumModel.objects.filter(artist=pk).all()
-        serializer = AlbumSerializer(albums, many=True)
+        albums = ArtistAlbum.objects.filter(artist=pk).all()
+        serializer = AlbumSerializer(albums, context={'request': request}, many=True)
         return Response(serializer.data)
 
     def post(self, request):
@@ -101,15 +109,16 @@ class AlbumDetailView(APIView):
     """
     retrieve, update or delete an album
     """
-    permission_classes = [permissions.IsAuthenticated, IsOwnerOrReadOnly]
+    permission_classes = [IsOwnerOrReadOnly]
+    # permission_classes = [permissions.IsAuthenticated, IsOwnerOrReadOnly]
 
     def get(self, request, pk):
-        album = get_object_or_404(AlbumModel, id=pk)
-        serializer = AlbumSerializer(album)
+        album = get_object_or_404(ArtistAlbum, id=pk)
+        serializer = AlbumSerializer(album, context={'request': request})
         return Response(serializer.data)
 
     def put(self, request, pk):
-        album = get_object_or_404(AlbumModel, id=pk)
+        album = get_object_or_404(ArtistAlbum, id=pk)
         serializer = AlbumSerializer(album, data=request.data)
         if serializer.is_valid():
             serializer.save()
@@ -117,12 +126,12 @@ class AlbumDetailView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, pk):
-        album = get_object_or_404(AlbumModel, id=pk)
+        album = get_object_or_404(ArtistAlbum, id=pk)
         album.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     def patch(self, request, pk):
-        album = get_object_or_404(AlbumModel, id=pk)
+        album = get_object_or_404(ArtistAlbum, id=pk)
         serialize = AlbumSerializer(album, data=request.data, partial=True)
         if serialize.is_valid():
             album.save()
@@ -134,11 +143,12 @@ class TrackListView(APIView):
     """
     lists and add tracks on specific album
     """
-    permission_classes = [permissions.IsAuthenticated, IsOwnerOrReadOnly]
+    permission_classes = [IsOwnerOrReadOnly]
+    # permission_classes = [permissions.IsAuthenticated, IsOwnerOrReadOnly]
 
     def get(self, request, pk):
-        tracks = TrackModel.objects.filter(album_id=pk).all()
-        serializer = TrackSerializer(tracks, many=True)
+        tracks = AlbumTrack.objects.filter(album_id=pk).all()
+        serializer = TrackSerializer(tracks, context={'request': request}, many=True)
         return Response(serializer.data)
 
     def post(self, request, pk):
@@ -149,7 +159,7 @@ class TrackListView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def patch(self, request, pk):
-        track = get_object_or_404(TrackModel, id=pk)
+        track = get_object_or_404(AlbumTrack, id=pk)
         serialize = TrackSerializer(track, data=request.data, partial=True)
         if serialize.is_valid():
             track.save()
@@ -157,7 +167,7 @@ class TrackListView(APIView):
         return Response(status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, pk):
-        track = TrackModel.objects.filter(pk=pk).all()
+        track = AlbumTrack.objects.filter(pk=pk).all()
         track.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
