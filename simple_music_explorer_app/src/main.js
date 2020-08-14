@@ -1,15 +1,32 @@
-import '@babel/polyfill'
-import 'mutationobserver-shim'
-import Vue from 'vue'
-import './plugins/bootstrap-vue'
-import App from './App.vue'
-import store from './store'
-import router from './router'
+import Vue from "vue";
+import App from "./App.vue";
 
-Vue.config.productionTip = false
+import router from "./router";
+import store from "./store";
+
+import Icon from "vue-awesome/components/Icon";
+import VModal from "vue-js-modal";
+import VueMoment from "vue-moment";
+import VueLazyload from "vue-lazyload";
+import vueSlider from "vue-slider-component";
+import "vue-slider-component/theme/default.css";
+
+import "./directives";
+import "./filters";
+import "optiscroll";
+import "vue-awesome/icons";
+
+Vue.component("icon", Icon);
+Vue.component("vueSlider", vueSlider);
+
+Vue.use(VModal);
+Vue.use(VueMoment);
+Vue.use(VueLazyload);
+
+Vue.config.productionTip = false;
 
 new Vue({
-  store,
   router,
+  store,
   render: h => h(App)
-}).$mount('#app')
+}).$mount("#app");
