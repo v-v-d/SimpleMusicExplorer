@@ -1,21 +1,23 @@
-import Vue from 'vue';
-import Vuex from 'vuex';
-import auth from '@/store/modules/auth';
+import Vue from "vue";
+import Vuex from "vuex";
+
+import app from "@/store/modules/app";
+import auth from "@/store/modules/auth";
+import notification from "@/store/modules/notification";
 import user from "@/store/modules/user";
+import player from "@/store/modules/player";
 
 Vue.use(Vuex);
 
 export default new Vuex.Store({
-  state: {
-    apiRoot: 'http://127.0.0.1:8000/api/v1',
-  },
-  getters: {
-    apiAuth: (state) => `${state.apiRoot}/auth`,
-    apiMusic: (state) => `${state.apiRoot}/music`,
-    apiMerch: (state) => `${state.apiRoot}/merch`,
-  },
+  state: {},
+  mutations: {},
+  actions: {},
   modules: {
+    app,
     auth,
+    notification,
     user,
-  },
+    player
+  }
 });

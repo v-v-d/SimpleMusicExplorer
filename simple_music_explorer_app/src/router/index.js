@@ -1,48 +1,55 @@
-import Vue from 'vue'
-import VueRouter from 'vue-router'
+import Vue from "vue";
+import VueRouter from "vue-router";
+import store from "@/store";
 
-Vue.use(VueRouter)
+import AlbumView from "@/views/Album";
+import ArtistView from "@/views/Artist";
+import BrowseView from "@/views/Browse";
+
+Vue.use(VueRouter);
 
 const routes = [
   {
-    path: '/',
-    name: 'Index',
-    redirect: { name: 'About' }
+    path: "/",
+    name: "Home",
+    redirect: {
+      name: "browse"
+    }
   },
+
   {
-    path: '/activate/:uid/:token/',
-    name: 'User activation',
-    props: true,
-    component: () => import(/* webpackChunkName: "UserActivation" */ '../views/UserActivation.vue')
+    path: "/browse",
+    name: "browse",
+    component: BrowseView
   },
+
   {
-    path: '/username/reset/confirm/:uid/:token/',
-    name: 'Username reset confirm',
-    props: true,
-    component: () => import(/* webpackChunkName: "UsernameResetConfirm" */ '../views/UsernameResetConfirm.vue')
+    path: "/album/:id",
+    name: "album",
+    component: AlbumView,
+    props: true
   },
+
   {
-    path: '/password/reset/confirm/:uid/:token/',
-    name: 'Password reset confirm',
-    props: true,
-    component: () => import(/* webpackChunkName: "PasswordResetConfirm" */ '../views/PasswordResetConfirm.vue')
+    path: "/artist/:id",
+    name: "artist",
+    component: ArtistView,
+    props: true
   },
+
   {
-    path: '/about',
-    name: 'About',
-    component: () => import(/* webpackChunkName: "about" */ '../views/About.vue')
-  },
-  {
-    path: '*',
-    name: 'NotFound',
-    component: () => import(/* webpackChunkName: "about" */ '../views/NotFound.vue')
+    path: "*",
+    beforeEnter: function(to, from, next) {
+      store.dispatch("app/notFoundPage", true);
+      next();
+    }
   }
-]
+];
 
 const router = new VueRouter({
-  mode: 'history',
+  mode: "history",
   base: process.env.BASE_URL,
   routes
-})
+});
 
-export default router
+export default router;
